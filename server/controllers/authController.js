@@ -372,3 +372,43 @@ export const register = asyncHandler(async (req, res) => {
 
   return res.status(201).json(responseData);
 });
+
+export const updatePassword = asyncHandler(async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  const userId = req.user.id;
+
+  if (!currentPassword || !newPassword) {
+    throw new ApiError(400, "Current password and new password are required.", "VALIDATION_ERROR");
+  }
+
+  if (newPassword.length < 6) {
+    throw new ApiError(400, "New password must be at least 6 characters long.", "VALIDATION_ERROR");
+  }
+
+  const user = await authService.findUserById(userId);
+  if (!user) {
+    throw new ApiError(404, "User not found", "USER_NOT_FOUND");
+  }
+
+  const isPasswordValid = await comparePassword(currentPassword, user.password);
+  if (!isPasswordValid) {
+    throw new ApiError(400, "Current password does not match.", "VALIDATION_ERROR");
+  }
+
+  const hashedPassword = await hashPassword(newPassword);
+  await authService.updateUserPassword(userId, hashedPassword);
+
+  await auditLogger({
+    userId: req.user.id,
+    action: "UPDATE",
+    module: "Authentication",
+    description: `User password updated successfully: ${req.user.email}`,
+    request: req,
+    status: "SUCCESS"
+  });
+
+  return res.status(200).json({
+    success: true,
+    message: "Password updated successfully",
+  });
+});

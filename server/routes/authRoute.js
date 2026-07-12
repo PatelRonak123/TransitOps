@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { login, logout, getCurrentUser, register } from "../controllers/authController.js";
+import { login, logout, getCurrentUser, register, updatePassword } from "../controllers/authController.js";
 import { verifyJWT } from "../middleware/authMiddleware.js";
 import { validateLogin, validateRegister } from "../utils/validation.js";
 
@@ -16,5 +16,8 @@ router.post("/logout", logout);
 
 // Get current logged-in user profile
 router.get("/me", verifyJWT, getCurrentUser);
+
+// Update user password
+router.put("/update-password", verifyJWT, updatePassword);
 
 export default router;

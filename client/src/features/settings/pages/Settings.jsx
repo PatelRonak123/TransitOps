@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import MainLayout from "../../../components/layout/MainLayout";
 import { useAuth } from "../../auth/context/AuthContext";
+import authService from "../../auth/service/authService";
+import { showHttpToast } from "../../../lib/httpToast";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -47,7 +49,7 @@ const Settings = () => {
     setTimeout(() => setProfileSuccess(false), 3000);
   };
 
-  const handlePasswordSubmit = (e) => {
+  const handlePasswordSubmit = async (e) => {
     e.preventDefault();
     setPasswordError("");
     setPasswordSuccess(false);
@@ -67,11 +69,25 @@ const Settings = () => {
       return;
     }
 
-    setPasswordSuccess(true);
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
-    setTimeout(() => setPasswordSuccess(false), 3000);
+    try {
+      const response = await authService.updatePassword({
+        currentPassword,
+        newPassword,
+      });
+
+      if (response?.success) {
+        setPasswordSuccess(true);
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+        showHttpToast(200, response?.message || "Password updated successfully");
+        setTimeout(() => setPasswordSuccess(false), 3000);
+      }
+    } catch (err) {
+      const message = err?.response?.data?.message || "Unable to update password";
+      setPasswordError(message);
+      showHttpToast(err?.response?.status || 500, message);
+    }
   };
 
   return (

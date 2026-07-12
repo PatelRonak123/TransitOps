@@ -15,6 +15,11 @@ const authService = {
         const response = await apiClient.post("/api/auth/logout");
         return response.data;
     },
+
+    updatePassword: async (passwords) => {
+        const response = await apiClient.put("/api/auth/update-password", passwords);
+        return response.data;
+    },
 };
 
 export default authService;

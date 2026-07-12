@@ -32,31 +32,55 @@ export default function useMaintenance() {
   }, []);
 
   const createRecord = useCallback(async (payload) => {
-    const response = await maintenanceService.create(payload);
-    await fetchData();
-    showHttpToast(200, response?.message || "Maintenance record created");
-    return response;
+    try {
+      const response = await maintenanceService.create(payload);
+      await fetchData();
+      showHttpToast(200, response?.message || "Maintenance record created");
+      return response;
+    } catch (err) {
+      const message = err?.response?.data?.message || "Unable to create maintenance record";
+      showHttpToast(err?.response?.status || 500, message);
+      throw err;
+    }
   }, [fetchData]);
 
   const startRecord = useCallback(async (id) => {
-    const response = await maintenanceService.start(id);
-    await fetchData();
-    showHttpToast(200, response?.message || "Maintenance started");
-    return response;
+    try {
+      const response = await maintenanceService.start(id);
+      await fetchData();
+      showHttpToast(200, response?.message || "Maintenance started");
+      return response;
+    } catch (err) {
+      const message = err?.response?.data?.message || "Unable to start maintenance";
+      showHttpToast(err?.response?.status || 500, message);
+      throw err;
+    }
   }, [fetchData]);
 
   const completeRecord = useCallback(async (id, payload) => {
-    const response = await maintenanceService.complete(id, payload);
-    await fetchData();
-    showHttpToast(200, response?.message || "Maintenance completed");
-    return response;
+    try {
+      const response = await maintenanceService.complete(id, payload);
+      await fetchData();
+      showHttpToast(200, response?.message || "Maintenance completed");
+      return response;
+    } catch (err) {
+      const message = err?.response?.data?.message || "Unable to complete maintenance";
+      showHttpToast(err?.response?.status || 500, message);
+      throw err;
+    }
   }, [fetchData]);
 
   const cancelRecord = useCallback(async (id) => {
-    const response = await maintenanceService.cancel(id);
-    await fetchData();
-    showHttpToast(200, response?.message || "Maintenance cancelled");
-    return response;
+    try {
+      const response = await maintenanceService.cancel(id);
+      await fetchData();
+      showHttpToast(200, response?.message || "Maintenance cancelled");
+      return response;
+    } catch (err) {
+      const message = err?.response?.data?.message || "Unable to cancel maintenance";
+      showHttpToast(err?.response?.status || 500, message);
+      throw err;
+    }
   }, [fetchData]);
 
   useEffect(() => {
