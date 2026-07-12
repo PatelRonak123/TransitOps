@@ -11,7 +11,8 @@ import {
   Settings as SettingsIcon,
   LogOut,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Brain
 } from "lucide-react";
 import authService from "../../features/auth/service/authService";
 import { showHttpToast } from "../../lib/httpToast";
@@ -54,6 +55,11 @@ const menuItems = [
     icon: <BarChart3 className="h-5 w-5" />,
   },
   {
+    name: "AI Diagnostics",
+    path: "/ai-diagnostics",
+    icon: <Brain className="h-5 w-5" />,
+  },
+  {
     name: "Settings",
     path: "/settings",
     icon: <SettingsIcon className="h-5 w-5" />,
@@ -62,7 +68,7 @@ const menuItems = [
 
 const Sidebar = ({ collapsed, toggleSidebar }) => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
 
   const handleLogout = async () => {
     try {
@@ -73,6 +79,16 @@ const Sidebar = ({ collapsed, toggleSidebar }) => {
       navigate("/", { replace: true });
     }
   };
+
+  const roleFeatures = {
+    "Fleet Manager": ["Vehicles", "Maintenance", "AI Diagnostics", "Settings"],
+    "Dispatcher": ["Dashboard", "Trips", "Settings"],
+    "Safety Officer": ["Drivers", "Settings"],
+    "Financial Analyst": ["Fuel & Expenses", "Reports", "Settings"]
+  };
+
+  const allowedFeatures = roleFeatures[user?.role] || [];
+  const filteredItems = menuItems.filter(item => allowedFeatures.includes(item.name));
 
   return (
     <motion.aside
@@ -119,7 +135,7 @@ const Sidebar = ({ collapsed, toggleSidebar }) => {
 
       {/* Navigation List */}
       <nav className="flex-grow mt-6 px-3 overflow-y-auto overflow-x-hidden">
-        {menuItems.map((item) => (
+        {filteredItems.map((item) => (
           <NavLink
             key={item.name}
             to={item.path}
