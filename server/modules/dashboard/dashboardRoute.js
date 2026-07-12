@@ -6,7 +6,8 @@ import {
   getFinancialKPIs,
   getChartData,
   getTopVehicles,
-  getAlerts
+  getAlerts,
+  searchSystem
 } from "./dashboardController.js";
 import { verifyJWT, authorize } from "../../middleware/authMiddleware.js";
 import { validateDashboardFilters } from "../../utils/validation.js";
@@ -15,6 +16,7 @@ const router = Router();
 
 const allowedRoles = ["Fleet Manager", "Dispatcher", "Safety Officer", "Financial Analyst"];
 
+router.get("/search", verifyJWT, authorize(...allowedRoles), searchSystem);
 router.get("/fleet", verifyJWT, authorize(...allowedRoles), validateDashboardFilters, getFleetKPIs);
 router.get("/trips", verifyJWT, authorize(...allowedRoles), validateDashboardFilters, getTripKPIs);
 router.get("/financial", verifyJWT, authorize(...allowedRoles), validateDashboardFilters, getFinancialKPIs);
