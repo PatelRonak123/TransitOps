@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Sidebar from "./Sidebar";
-import Topbar from "./Topbar";
+import Topbar from "./TopBar";
 
 const MainLayout = ({ children }) => {
   const [collapsed, setCollapsed] = useState(() => {

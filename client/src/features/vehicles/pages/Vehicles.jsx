@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import MainLayout from "../../../components/layout/MainLayout";
 import VehicleFilters from "../components/VehicleFilters";
 import VehicleModal from "../components/VehicleModal";
@@ -13,10 +14,17 @@ const StatCard = ({ label, value }) => (
 );
 
 export const Vehicles = () => {
+  const [searchParams] = useSearchParams();
+  const searchParam = searchParams.get("search") || "";
+
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
-  const [filters, setFilters] = useState({ search: "", status: "", vehicle_type: "", region: "" });
+  const [filters, setFilters] = useState({ search: searchParam, status: "", vehicle_type: "", region: "" });
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    setFilters((prev) => ({ ...prev, search: searchParam }));
+  }, [searchParam]);
   const {
     vehicles,
     pagination,

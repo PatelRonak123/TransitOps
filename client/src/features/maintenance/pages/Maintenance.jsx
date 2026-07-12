@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import MainLayout from "../../../components/layout/MainLayout";
 import MaintenanceFilters from "../components/MaintenanceFilters";
 import MaintenanceTable from "../components/MaintenanceTable";
@@ -7,9 +8,16 @@ import useMaintenance from "../hooks/useMaintenance";
 import useVehicles from "../../vehicles/hooks/useVehicles";
 
 const MaintenancePage = () => {
-  const [filters, setFilters] = useState({ search: "", status: "", priority: "" });
+  const [searchParams] = useSearchParams();
+  const searchParam = searchParams.get("search") || "";
+
+  const [filters, setFilters] = useState({ search: searchParam, status: "", priority: "" });
   const [modalOpen, setModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    setFilters((prev) => ({ ...prev, search: searchParam }));
+  }, [searchParam]);
   const { records, stats, loading, error, fetchData, createRecord, startRecord, completeRecord, cancelRecord } = useMaintenance();
   const { vehicles, fetchVehicles } = useVehicles();
 
