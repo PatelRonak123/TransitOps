@@ -1,6 +1,7 @@
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { vehicleService } from "./vehicleService.js";
 import { ApiError } from "../../utils/ApiError.js";
+import { auditLogger } from "../../utils/auditLogger.js";
 
 const formatVehicleResponse = (vehicle) => {
   if (!vehicle) return null;
@@ -25,6 +26,16 @@ const formatVehicleResponse = (vehicle) => {
 export const createVehicle = asyncHandler(async (req, res) => {
   try {
     const vehicle = await vehicleService.createVehicle(req.body);
+    await auditLogger({
+      action: "CREATE",
+      module: "Vehicle",
+      entityId: vehicle.id,
+      entityName: "Vehicle",
+      newData: formatVehicleResponse(vehicle),
+      description: `Vehicle created: ${vehicle.registrationNumber} (${vehicle.vehicleName})`,
+      request: req,
+      status: "SUCCESS"
+    });
     return res.status(201).json({
       success: true,
       message: "Vehicle created successfully",
@@ -62,6 +73,16 @@ export const getVehicleById = asyncHandler(async (req, res) => {
 export const updateVehicle = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const vehicle = await vehicleService.updateVehicle(id, req.body);
+  await auditLogger({
+    action: "UPDATE",
+    module: "Vehicle",
+    entityId: vehicle.id,
+    entityName: "Vehicle",
+    newData: formatVehicleResponse(vehicle),
+    description: `Vehicle updated: ${vehicle.registrationNumber}`,
+    request: req,
+    status: "SUCCESS"
+  });
   return res.status(200).json({
     success: true,
     message: "Vehicle updated successfully",
@@ -72,6 +93,15 @@ export const updateVehicle = asyncHandler(async (req, res) => {
 export const deleteVehicle = asyncHandler(async (req, res) => {
   const { id } = req.params;
   await vehicleService.deleteVehicle(id);
+  await auditLogger({
+    action: "DELETE",
+    module: "Vehicle",
+    entityId: id,
+    entityName: "Vehicle",
+    description: `Vehicle deleted: ID ${id}`,
+    request: req,
+    status: "SUCCESS"
+  });
   return res.status(200).json({
     success: true,
     message: "Vehicle deleted successfully",

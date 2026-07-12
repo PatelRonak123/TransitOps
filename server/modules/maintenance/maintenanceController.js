@@ -1,5 +1,6 @@
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { maintenanceService } from "./maintenanceService.js";
+import { auditLogger } from "../../utils/auditLogger.js";
 
 const formatMaintenanceResponse = (item) => {
   if (!item) return null;
@@ -52,10 +53,21 @@ const formatMaintenanceResponse = (item) => {
 export const createMaintenance = asyncHandler(async (req, res) => {
   try {
     const log = await maintenanceService.createMaintenance(req.body, req.user.id);
+    const formatted = formatMaintenanceResponse(log);
+    await auditLogger({
+      action: "ASSIGN",
+      module: "Maintenance",
+      entityId: formatted.id,
+      entityName: "Maintenance Log",
+      newData: formatted,
+      description: `Maintenance scheduled: ${formatted.maintenance_number} for Vehicle ID ${formatted.vehicle_id}`,
+      request: req,
+      status: "SUCCESS"
+    });
     return res.status(201).json({
       success: true,
       message: "Maintenance created successfully",
-      data: formatMaintenanceResponse(log),
+      data: formatted,
     });
   } catch (error) {
     if (error.statusCode === 409) {
@@ -89,16 +101,35 @@ export const getMaintenanceById = asyncHandler(async (req, res) => {
 export const updateMaintenance = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const log = await maintenanceService.updateMaintenance(id, req.body);
+  const formatted = formatMaintenanceResponse(log);
+  await auditLogger({
+    action: "UPDATE",
+    module: "Maintenance",
+    entityId: formatted.id,
+    entityName: "Maintenance Log",
+    newData: formatted,
+    description: `Maintenance log updated: ${formatted.maintenance_number}`,
+    request: req,
+    status: "SUCCESS"
+  });
   return res.status(200).json({
     success: true,
     message: "Maintenance updated successfully",
-    data: formatMaintenanceResponse(log),
+    data: formatted,
   });
 });
-
 export const deleteMaintenance = asyncHandler(async (req, res) => {
   const { id } = req.params;
   await maintenanceService.deleteMaintenance(id);
+  await auditLogger({
+    action: "DELETE",
+    module: "Maintenance",
+    entityId: id,
+    entityName: "Maintenance Log",
+    description: `Maintenance record deleted: ID ${id}`,
+    request: req,
+    status: "SUCCESS"
+  });
   return res.status(200).json({
     success: true,
     message: "Maintenance deleted successfully",
@@ -108,30 +139,63 @@ export const deleteMaintenance = asyncHandler(async (req, res) => {
 export const startMaintenance = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const log = await maintenanceService.startMaintenance(id);
+  const formatted = formatMaintenanceResponse(log);
+  await auditLogger({
+    action: "UPDATE",
+    module: "Maintenance",
+    entityId: formatted.id,
+    entityName: "Maintenance Log",
+    newData: formatted,
+    description: `Maintenance started: ${formatted.maintenance_number}`,
+    request: req,
+    status: "SUCCESS"
+  });
   return res.status(200).json({
     success: true,
     message: "Maintenance started successfully",
-    data: formatMaintenanceResponse(log),
+    data: formatted,
   });
 });
 
 export const completeMaintenance = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const log = await maintenanceService.completeMaintenance(id, req.body);
+  const formatted = formatMaintenanceResponse(log);
+  await auditLogger({
+    action: "COMPLETE",
+    module: "Maintenance",
+    entityId: formatted.id,
+    entityName: "Maintenance Log",
+    newData: formatted,
+    description: `Maintenance completed: ${formatted.maintenance_number}`,
+    request: req,
+    status: "SUCCESS"
+  });
   return res.status(200).json({
     success: true,
     message: "Maintenance completed successfully",
-    data: formatMaintenanceResponse(log),
+    data: formatted,
   });
 });
 
 export const cancelMaintenance = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const log = await maintenanceService.cancelMaintenance(id);
+  const formatted = formatMaintenanceResponse(log);
+  await auditLogger({
+    action: "CANCEL",
+    module: "Maintenance",
+    entityId: formatted.id,
+    entityName: "Maintenance Log",
+    newData: formatted,
+    description: `Maintenance cancelled: ${formatted.maintenance_number}`,
+    request: req,
+    status: "SUCCESS"
+  });
   return res.status(200).json({
     success: true,
     message: "Maintenance cancelled successfully",
-    data: formatMaintenanceResponse(log),
+    data: formatted,
   });
 });
 

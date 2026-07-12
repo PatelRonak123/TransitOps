@@ -6,6 +6,7 @@ import { hashPassword, comparePassword } from "../utils/password.js";
 import { generateToken } from "../utils/jwt.js";
 import { parseUserAgent } from "../utils/deviceDetector.js";
 import { ENV } from "../config/env.js";
+import { auditLogger } from "../utils/auditLogger.js";
 
 // Feature 11: Constants
 const MAX_LOGIN_ATTEMPTS = 5;
@@ -95,6 +96,15 @@ export const login = asyncHandler(async (req, res) => {
         status: "LOCKED"
       });
 
+      await auditLogger({
+        userId: user.id,
+        action: "LOGIN",
+        module: "Authentication",
+        description: `Login attempted on locked user account: ${email}`,
+        request: req,
+        status: "FAILED"
+      });
+
       return res.status(423).json({
         success: false,
         message: "Account is locked.",
@@ -139,6 +149,15 @@ export const login = asyncHandler(async (req, res) => {
         status: "LOCKED"
       });
 
+      await auditLogger({
+        userId: user.id,
+        action: "ACCOUNT_LOCKED",
+        module: "Authentication",
+        description: `User account locked due to 5 consecutive failed logins: ${email}`,
+        request: req,
+        status: "FAILED"
+      });
+
       return res.status(423).json({
         success: false,
         message: "Account locked due to multiple failed login attempts.",
@@ -160,6 +179,15 @@ export const login = asyncHandler(async (req, res) => {
         browser,
         operatingSystem,
         deviceType,
+        status: "FAILED"
+      });
+
+      await auditLogger({
+        userId: user.id,
+        action: "LOGIN",
+        module: "Authentication",
+        description: `Failed login attempt (invalid password) for user: ${email}`,
+        request: req,
         status: "FAILED"
       });
 
@@ -246,6 +274,15 @@ export const login = asyncHandler(async (req, res) => {
     status: "SUCCESS"
   });
 
+  await auditLogger({
+    userId: user.id,
+    action: "LOGIN",
+    module: "Authentication",
+    description: `User logged in successfully: ${email} (${role})`,
+    request: req,
+    status: "SUCCESS"
+  });
+
   return res.status(200).json({
     success: true,
     message: "Login Successful",
@@ -267,6 +304,17 @@ export const logout = asyncHandler(async (req, res) => {
     sameSite: "strict",
     secure: ENV.NODE_ENV === "production",
   });
+
+  if (req.user) {
+    await auditLogger({
+      userId: req.user.id,
+      action: "LOGOUT",
+      module: "Authentication",
+      description: `User logged out successfully: ${req.user.email}`,
+      request: req,
+      status: "SUCCESS"
+    });
+  }
 
   return res.status(200).json({
     success: true,
