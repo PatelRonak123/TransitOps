@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import { corsMiddleware, corsPreflight } from "./config/corsConfig.js";
 import authRoutes from "./routes/authRoute.js";
 import vehicleRoutes from "./modules/vehicle/vehicleRoute.js";
+import driverRoutes from "./modules/driver/driverRoute.js";
 import { ErrorHandler } from "./utils/ErrorHandler.js";
 import { ENV } from "./config/env.js";
 
@@ -26,6 +27,7 @@ app.use(cookieParser());
 // Route Registration
 app.use("/api/auth", authRoutes);
 app.use("/api/vehicles", vehicleRoutes);
+app.use("/api/drivers", driverRoutes);
 
 app.get("/health", (req, res) => {
   res.send("Server is running and healthy!");

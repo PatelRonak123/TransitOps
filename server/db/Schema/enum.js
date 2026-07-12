@@ -21,3 +21,19 @@ export const vehicleStatusEnum = pgEnum("status", [
   "In Shop",
   "Retired"
 ]);
+
+export const licenseCategoryEnum = pgEnum("license_category", [
+  "LMV",
+  "HMV",
+  "MCWG",
+  "Transport",
+  "Heavy Transport"
+]);
+
+export const driverStatusEnum = pgEnum("driver_status", [
+  "Available",
+  "On Trip",
+  "Off Duty",
+  "Suspended"
+]);
+
