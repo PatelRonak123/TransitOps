@@ -26,8 +26,10 @@ router.get("/:id", verifyJWT, authorize("Fleet Manager", "Dispatcher", "Safety O
 // Create operations - Allowed for Fleet Manager and Dispatcher
 router.post("/", verifyJWT, authorize("Fleet Manager", "Dispatcher"), validateCreateFuelLog, createFuelLog);
 
-// Update/Delete operations - Allowed only for Fleet Manager
-router.patch("/:id", verifyJWT, authorize("Fleet Manager"), validateUpdateFuelLog, updateFuelLog);
+// Update operations - Allowed for Fleet Manager and Dispatcher
+router.patch("/:id", verifyJWT, authorize("Fleet Manager", "Dispatcher"), validateUpdateFuelLog, updateFuelLog);
+
+// Delete operations - Allowed only for Fleet Manager
 router.delete("/:id", verifyJWT, authorize("Fleet Manager"), deleteFuelLog);
 
 export default router;
