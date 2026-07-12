@@ -2,6 +2,7 @@ import axios from "axios"
 
 const apiClient = axios.create({
     baseURL: "http://localhost:3000",
+    withCredentials: true,
     headers: {
         "Content-Type": "application/json",
     },
@@ -10,10 +11,6 @@ const apiClient = axios.create({
 // request interceptor
 apiClient.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem("token")
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`
-        }
         return config
     },
     (error) => {
@@ -30,3 +27,5 @@ apiClient.interceptors.response.use(
         return Promise.reject(error)
     }
 )
+
+export default apiClient

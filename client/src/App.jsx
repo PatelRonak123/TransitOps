@@ -1,18 +1,37 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-function App() {
-    // Define routing here
+import './index.css'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import Dashboard from './features/dashboard/pages/Dashboard'
+import Home from './features/auth/pages/Home'
+import { AuthProvider, useAuth } from './features/auth/context/AuthContext'
+
+function AppRoutes() {
+    const { isAuthenticated, isLoading } = useAuth()
+
+    if (isLoading) {
+        return null
+    }
+
     return (
-        <BrowserRouter>
-            <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/about" element={<About />} />
-            </Routes>
-        </BrowserRouter>
+        <Routes>
+            <Route
+                path="/"
+                element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Home />}
+            />
+            <Route
+                path="/dashboard"
+                element={isAuthenticated ? <Dashboard /> : <Navigate to="/" replace />}
+            />
+        </Routes>
+    )
+}
+
+function App() {
+    return (
+        <AuthProvider>
+            <BrowserRouter>
+                <AppRoutes />
+            </BrowserRouter>
+        </AuthProvider>
     )
 }
 
