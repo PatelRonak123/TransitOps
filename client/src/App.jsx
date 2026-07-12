@@ -1,5 +1,5 @@
 import './index.css'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import Dashboard from './features/dashboard/pages/Dashboard'
 import Home from './features/auth/pages/Home'
 import { AuthProvider, useAuth } from './features/auth/context/AuthContext'
@@ -7,15 +7,19 @@ import { AuthProvider, useAuth } from './features/auth/context/AuthContext'
 function AppRoutes() {
     const { isAuthenticated, isLoading } = useAuth()
 
+    if (isLoading) {
+        return null
+    }
+
     return (
         <Routes>
             <Route
                 path="/"
-                element={isLoading ? null : (isAuthenticated ? <Navigate to="/dashboard" replace /> : <Home />)}
+                element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Home />}
             />
             <Route
                 path="/dashboard"
-                element={isLoading ? null : (isAuthenticated ? <Dashboard /> : <Navigate to="/" replace />)}
+                element={isAuthenticated ? <Dashboard /> : <Navigate to="/" replace />}
             />
         </Routes>
     )

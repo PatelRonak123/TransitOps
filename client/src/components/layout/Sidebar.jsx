@@ -72,51 +72,78 @@ const Sidebar = () => {
   };
 
   return (
-    <aside className="w-64 h-screen bg-slate-900 text-white flex flex-col shadow-lg">
+    <aside className="w-72 h-screen bg-white border-r border-gray-200 flex flex-col shadow-sm">
 
       {/* Logo */}
-      <div className="p-6 border-b border-slate-700">
-        <h1 className="text-2xl font-bold text-cyan-400">
+
+      <div className="px-8 py-8 border-b border-gray-100">
+
+        <h1 className="text-4xl font-bold text-orange-500">
           TransitOps
         </h1>
-        <p className="text-xs text-slate-400 mt-1">
+
+        <p className="text-gray-500 mt-2">
           Smart Transport Platform
         </p>
+
       </div>
 
       {/* Menu */}
-      <nav className="flex-1 mt-4 px-3">
+
+      <nav className="flex-1 mt-6 px-5">
 
         {menuItems.map((item) => (
           <NavLink
             key={item.name}
             to={item.path}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-all duration-200
+              `flex items-center gap-4 px-5 py-4 rounded-2xl mb-2 transition-all duration-300
               ${
                 isActive
-                  ? "bg-cyan-500 text-white"
-                  : "hover:bg-slate-800 text-slate-300"
+                  ? "bg-orange-500 text-white shadow-md"
+                  : "text-gray-600 hover:bg-orange-50 hover:text-orange-500"
               }`
             }
           >
             <span className="text-lg">{item.icon}</span>
-            <span>{item.name}</span>
+
+            <span className="font-medium">
+              {item.name}
+            </span>
           </NavLink>
         ))}
 
       </nav>
 
       {/* Logout */}
-      <div className="p-4 border-t border-slate-700">
+
+      <div className="p-5 border-t border-gray-100">
+
         <button
-          type="button"
-          onClick={handleLogout}
-          className="flex items-center gap-3 w-full px-4 py-3 rounded-lg bg-red-500 hover:bg-red-600 transition"
+          className="
+          w-full
+          flex
+          items-center
+          justify-center
+          gap-3
+          bg-red-50
+          hover:bg-red-500
+          text-red-500
+          hover:text-white
+          py-4
+          rounded-2xl
+          transition-all
+          duration-300
+          font-semibold
+          "
+           onClick={handleLogout}
         >
           <FaSignOutAlt />
+
           Logout
+
         </button>
+
       </div>
 
     </aside>
