@@ -9,12 +9,15 @@ import {
   FaCog,
   FaSignOutAlt,
 } from "react-icons/fa";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import authService from "../../features/auth/service/authService";
+import { showHttpToast } from "../../lib/httpToast";
+import { useAuth } from "../../features/auth/context/AuthContext";
 
 const menuItems = [
   {
     name: "Dashboard",
-    path: "/",
+    path: "/dashboard",
     icon: <FaTachometerAlt />,
   },
   {
@@ -55,6 +58,19 @@ const menuItems = [
 ];
 
 const Sidebar = () => {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      const response = await authService.logout();
+      showHttpToast(200, response?.message || "Logged out successfully.");
+    } finally {
+      logout();
+      navigate("/", { replace: true });
+    }
+  };
+
   return (
     <aside className="w-64 h-screen bg-slate-900 text-white flex flex-col shadow-lg">
 
@@ -93,7 +109,11 @@ const Sidebar = () => {
 
       {/* Logout */}
       <div className="p-4 border-t border-slate-700">
-        <button className="flex items-center gap-3 w-full px-4 py-3 rounded-lg bg-red-500 hover:bg-red-600 transition">
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="flex items-center gap-3 w-full px-4 py-3 rounded-lg bg-red-500 hover:bg-red-600 transition"
+        >
           <FaSignOutAlt />
           Logout
         </button>
