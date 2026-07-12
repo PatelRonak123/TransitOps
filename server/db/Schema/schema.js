@@ -24,3 +24,16 @@ export const authLogs = pgTable("auth_logs", {
   status: varchar("status", { length: 20 }).notNull(), // SUCCESS, FAILED, LOCKED
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export const loginHistory = pgTable("login_history", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").references(() => users.id),
+  email: varchar("email").notNull(),
+  role: varchar("role"),
+  ipAddress: varchar("ip_address", { length: 50 }),
+  browser: varchar("browser", { length: 100 }),
+  operatingSystem: varchar("operating_system", { length: 100 }),
+  deviceType: varchar("device_type", { length: 50 }),
+  status: varchar("status", { length: 20 }).notNull(), // SUCCESS, FAILED, LOCKED, ROLE_MISMATCH
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});

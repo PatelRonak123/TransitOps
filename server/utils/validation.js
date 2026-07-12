@@ -1,19 +1,32 @@
 import { ApiError } from "./ApiError.js";
 
 export const validateLogin = (req, res, next) => {
-  const { email, password } = req.body;
+  const { email, password, role, rememberMe } = req.body;
 
-  if (!email || typeof email !== "string") {
+  if (!email || typeof email !== "string" || email.trim() === "") {
     throw new ApiError(400, "Email is required", "VALIDATION_ERROR");
   }
 
-  if (!password || typeof password !== "string") {
+  if (!password || typeof password !== "string" || password === "") {
     throw new ApiError(400, "Password is required", "VALIDATION_ERROR");
   }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email.trim())) {
     throw new ApiError(400, "Invalid email format", "VALIDATION_ERROR");
+  }
+
+  if (!role || typeof role !== "string" || role.trim() === "") {
+    throw new ApiError(400, "Role is required", "VALIDATION_ERROR");
+  }
+
+  const allowedRoles = ["Fleet Manager", "Dispatcher", "Safety Officer", "Financial Analyst"];
+  if (!allowedRoles.includes(role)) {
+    throw new ApiError(400, "Invalid role selected.", "VALIDATION_ERROR");
+  }
+
+  if (rememberMe !== undefined && typeof rememberMe !== "boolean") {
+    throw new ApiError(400, "RememberMe must be a boolean value", "VALIDATION_ERROR");
   }
 
   next();
