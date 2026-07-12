@@ -892,6 +892,30 @@ export const validateUpdateExpense = (req, res, next) => {
   next();
 };
 
+export const validateDashboardFilters = (req, res, next) => {
+  const { from, to } = req.query;
+
+  if (from !== undefined) {
+    if (from.trim() === "" || isNaN(Date.parse(from))) {
+      throw new ApiError(400, "Invalid 'from' date format", "VALIDATION_ERROR");
+    }
+  }
+
+  if (to !== undefined) {
+    if (to.trim() === "" || isNaN(Date.parse(to))) {
+      throw new ApiError(400, "Invalid 'to' date format", "VALIDATION_ERROR");
+    }
+  }
+
+  if (from && to) {
+    if (new Date(from) > new Date(to)) {
+      throw new ApiError(400, "'from' date cannot be after 'to' date", "VALIDATION_ERROR");
+    }
+  }
+
+  next();
+};
+
 
 
 
