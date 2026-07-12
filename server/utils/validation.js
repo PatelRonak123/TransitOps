@@ -444,4 +444,165 @@ export const validateCompleteTripBody = (req, res, next) => {
   next();
 };
 
+export const validateCreateMaintenance = (req, res, next) => {
+  if (!req.body || typeof req.body !== "object") {
+    throw new ApiError(400, "Request body is required", "VALIDATION_ERROR");
+  }
+
+  const {
+    vehicle_id,
+    maintenance_type,
+    issue_title,
+    priority,
+    estimated_cost,
+    start_date,
+    expected_completion_date
+  } = req.body;
+
+  if (!vehicle_id || typeof vehicle_id !== "string") {
+    throw new ApiError(400, "Vehicle ID is required", "VALIDATION_ERROR");
+  }
+
+  const allowedTypes = [
+    "Oil Change",
+    "Engine Repair",
+    "Tyre Replacement",
+    "Battery",
+    "General Service",
+    "Brake Service",
+    "Accident Repair",
+    "Other"
+  ];
+  if (!maintenance_type || typeof maintenance_type !== "string" || !allowedTypes.includes(maintenance_type)) {
+    throw new ApiError(400, `Invalid maintenance type. Allowed types: ${allowedTypes.join(", ")}`, "VALIDATION_ERROR");
+  }
+
+  if (!issue_title || typeof issue_title !== "string" || issue_title.trim() === "") {
+    throw new ApiError(400, "Issue title is required", "VALIDATION_ERROR");
+  }
+  req.body.issue_title = issue_title.trim();
+
+  const allowedPriorities = ["Low", "Medium", "High", "Critical"];
+  if (!priority || typeof priority !== "string" || !allowedPriorities.includes(priority)) {
+    throw new ApiError(400, `Invalid priority. Allowed priorities: ${allowedPriorities.join(", ")}`, "VALIDATION_ERROR");
+  }
+
+  if (estimated_cost !== undefined && estimated_cost !== null) {
+    const est = Number(estimated_cost);
+    if (isNaN(est) || est < 0) {
+      throw new ApiError(400, "Estimated cost must be a non-negative number", "VALIDATION_ERROR");
+    }
+    req.body.estimated_cost = est;
+  }
+
+  if (start_date !== undefined && start_date !== null) {
+    if (isNaN(Date.parse(start_date))) {
+      throw new ApiError(400, "Invalid start date format", "VALIDATION_ERROR");
+    }
+  }
+
+  if (expected_completion_date !== undefined && expected_completion_date !== null) {
+    if (isNaN(Date.parse(expected_completion_date))) {
+      throw new ApiError(400, "Invalid expected completion date format", "VALIDATION_ERROR");
+    }
+    if (start_date && Date.parse(expected_completion_date) < Date.parse(start_date)) {
+      throw new ApiError(400, "Expected completion date cannot be before start date", "VALIDATION_ERROR");
+    }
+  }
+
+  next();
+};
+
+export const validateUpdateMaintenance = (req, res, next) => {
+  if (!req.body || typeof req.body !== "object") {
+    throw new ApiError(400, "Request body is required", "VALIDATION_ERROR");
+  }
+
+  const {
+    maintenance_type,
+    issue_title,
+    priority,
+    estimated_cost,
+    actual_cost,
+    expected_completion_date
+  } = req.body;
+
+  if (maintenance_type !== undefined) {
+    const allowedTypes = [
+      "Oil Change",
+      "Engine Repair",
+      "Tyre Replacement",
+      "Battery",
+      "General Service",
+      "Brake Service",
+      "Accident Repair",
+      "Other"
+    ];
+    if (typeof maintenance_type !== "string" || !allowedTypes.includes(maintenance_type)) {
+      throw new ApiError(400, `Invalid maintenance type. Allowed types: ${allowedTypes.join(", ")}`, "VALIDATION_ERROR");
+    }
+  }
+
+  if (issue_title !== undefined) {
+    if (typeof issue_title !== "string" || issue_title.trim() === "") {
+      throw new ApiError(400, "Issue title cannot be empty", "VALIDATION_ERROR");
+    }
+    req.body.issue_title = issue_title.trim();
+  }
+
+  if (priority !== undefined) {
+    const allowedPriorities = ["Low", "Medium", "High", "Critical"];
+    if (typeof priority !== "string" || !allowedPriorities.includes(priority)) {
+      throw new ApiError(400, `Invalid priority. Allowed priorities: ${allowedPriorities.join(", ")}`, "VALIDATION_ERROR");
+    }
+  }
+
+  if (estimated_cost !== undefined && estimated_cost !== null) {
+    const est = Number(estimated_cost);
+    if (isNaN(est) || est < 0) {
+      throw new ApiError(400, "Estimated cost must be a non-negative number", "VALIDATION_ERROR");
+    }
+    req.body.estimated_cost = est;
+  }
+
+  if (actual_cost !== undefined && actual_cost !== null) {
+    const act = Number(actual_cost);
+    if (isNaN(act) || act < 0) {
+      throw new ApiError(400, "Actual cost must be a non-negative number", "VALIDATION_ERROR");
+    }
+    req.body.actual_cost = act;
+  }
+
+  if (expected_completion_date !== undefined && expected_completion_date !== null) {
+    if (isNaN(Date.parse(expected_completion_date))) {
+      throw new ApiError(400, "Invalid expected completion date format", "VALIDATION_ERROR");
+    }
+  }
+
+  next();
+};
+
+export const validateCompleteMaintenanceBody = (req, res, next) => {
+  if (!req.body || typeof req.body !== "object") {
+    throw new ApiError(400, "Request body is required", "VALIDATION_ERROR");
+  }
+
+  const { actual_cost, completion_date } = req.body;
+
+  const act = Number(actual_cost);
+  if (actual_cost === undefined || actual_cost === null || isNaN(act) || act < 0) {
+    throw new ApiError(400, "Actual cost must be a non-negative number", "VALIDATION_ERROR");
+  }
+  req.body.actual_cost = act;
+
+  if (completion_date !== undefined && completion_date !== null) {
+    if (isNaN(Date.parse(completion_date))) {
+      throw new ApiError(400, "Invalid completion date format", "VALIDATION_ERROR");
+    }
+  }
+
+  next();
+};
+
+
 
