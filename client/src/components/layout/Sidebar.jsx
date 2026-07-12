@@ -79,19 +79,19 @@ const Sidebar = ({ collapsed, toggleSidebar }) => {
       initial={false}
       animate={{ width: collapsed ? 76 : 260 }}
       transition={{ duration: 0.2, ease: "easeInOut" }}
-      className="relative h-screen bg-slate-50 border-r border-slate-200/80 flex flex-col shadow-sm overflow-visible"
+      className="relative h-screen bg-[#121212] flex flex-col shadow-xl overflow-visible border-r border-[#27272A]"
     >
       {/* Floating Collapse Trigger on Border */}
       <button
         onClick={toggleSidebar}
-        className="absolute top-8 -right-3 h-6 w-6 rounded-full bg-white hover:bg-orange-500 border border-slate-200 hover:border-orange-500 flex items-center justify-center text-slate-400 hover:text-white transition duration-200 shadow-sm cursor-pointer z-50"
+        className="absolute top-8 -right-3 h-6 w-6 rounded-full bg-[#121212] hover:bg-orange-500 border border-[#27272A] hover:border-orange-500 flex items-center justify-center text-zinc-400 hover:text-white transition duration-200 shadow-md cursor-pointer z-50 animate-none"
         title={collapsed ? "Expand Sidebar" : "Collapse Sidebar"}
       >
         {collapsed ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronLeft className="h-3.5 w-3.5" />}
       </button>
 
       {/* Brand Header */}
-      <div className="py-6 border-b border-slate-200/60 flex items-center pl-7 overflow-hidden h-[89px]">
+      <div className="py-6 border-b border-[#27272A] flex items-center pl-7 overflow-hidden h-[89px]">
         <div className="flex items-center">
           <div className="h-10 w-10 bg-gradient-to-tr from-orange-500 to-amber-400 rounded-xl flex items-center justify-center text-white text-xl font-black shadow flex-shrink-0">
             T
@@ -107,10 +107,10 @@ const Sidebar = ({ collapsed, toggleSidebar }) => {
             transition={{ duration: 0.15, ease: "easeInOut" }}
             className="text-left overflow-hidden whitespace-nowrap"
           >
-            <h1 className="text-xl font-extrabold tracking-tight text-slate-800 leading-none">
+            <h1 className="text-xl font-extrabold tracking-tight text-white leading-none">
               Transit<span className="text-orange-500">Ops</span>
             </h1>
-            <p className="text-slate-400 text-[10px] font-bold mt-1 tracking-wider uppercase">
+            <p className="text-zinc-500 text-[10px] font-bold mt-1 tracking-wider uppercase">
               Logistics Hub
             </p>
           </motion.div>
@@ -118,24 +118,24 @@ const Sidebar = ({ collapsed, toggleSidebar }) => {
       </div>
 
       {/* Navigation List */}
-      <nav className="flex-grow mt-6 px-0 overflow-y-auto overflow-x-hidden">
+      <nav className="flex-grow mt-6 px-3 overflow-y-auto overflow-x-hidden">
         {menuItems.map((item) => (
           <NavLink
             key={item.name}
             to={item.path}
             title={collapsed ? item.name : ""}
             className={({ isActive }) =>
-              `flex items-center py-3 pl-[28px] pr-4 border-l-4 transition-colors duration-200 group relative mb-1.5
+              `flex items-center py-3 pl-[16px] rounded-xl mb-1.5 transition-all duration-200 group relative
               ${
                 isActive
-                  ? "bg-orange-50/80 text-orange-600 border-l-orange-500 font-bold"
-                  : "text-slate-600 border-l-transparent hover:bg-slate-100 hover:text-slate-900"
+                  ? "bg-white/10 text-white font-bold shadow-sm"
+                  : "text-zinc-400 hover:bg-white/5 hover:text-white"
               }`
             }
           >
             <motion.span 
               initial={false}
-              animate={{ marginRight: collapsed ? 0 : 16 }}
+              animate={{ marginRight: collapsed ? 0 : 14 }}
               transition={{ duration: 0.15, ease: "easeInOut" }}
               className="flex-shrink-0"
             >
@@ -156,7 +156,7 @@ const Sidebar = ({ collapsed, toggleSidebar }) => {
 
             {/* Custom Tooltip in Collapsed Mode */}
             {collapsed && (
-              <div className="absolute left-full ml-3 px-3 py-1.5 bg-slate-900 text-white text-xs font-bold rounded-lg opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-200 z-50 shadow-md whitespace-nowrap">
+              <div className="absolute left-full ml-4 px-3 py-1.5 bg-[#1A1A1A] text-white text-xs font-bold rounded-lg opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-200 z-50 shadow-md whitespace-nowrap border border-[#27272A]">
                 {item.name}
               </div>
             )}
@@ -165,11 +165,11 @@ const Sidebar = ({ collapsed, toggleSidebar }) => {
       </nav>
 
       {/* Logout Action */}
-      <div className="border-t border-slate-200/60 p-4">
+      <div className="border-t border-[#27272A] p-4">
         <button
           onClick={handleLogout}
           title={collapsed ? "Logout" : ""}
-          className="w-full flex items-center py-3 pl-[24px] pr-4 bg-slate-100 hover:bg-rose-500 text-slate-600 hover:text-white rounded-xl transition-colors duration-200 font-bold text-sm group relative"
+          className="w-full flex items-center py-3 pl-[16px] bg-white/5 hover:bg-rose-500/20 text-zinc-400 hover:text-rose-400 rounded-xl transition-all duration-200 font-bold text-sm group relative border border-transparent hover:border-rose-500/20"
         >
           <motion.span
             initial={false}
@@ -193,7 +193,7 @@ const Sidebar = ({ collapsed, toggleSidebar }) => {
           </motion.span>
 
           {collapsed && (
-            <div className="absolute left-full ml-3 px-3 py-1.5 bg-slate-900 text-white text-xs font-bold rounded-lg opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-200 z-50 shadow-md whitespace-nowrap">
+            <div className="absolute left-full ml-4 px-3 py-1.5 bg-[#1A1A1A] text-white text-xs font-bold rounded-lg opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-200 z-50 shadow-md whitespace-nowrap border border-[#27272A]">
               Logout
             </div>
           )}
