@@ -1,8 +1,16 @@
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { reportService } from "./reportService.js";
+import { auditLogger } from "../../utils/auditLogger.js";
 
 export const getVehicleReport = asyncHandler(async (req, res) => {
   const data = await reportService.getVehicleReport(req.query);
+  await auditLogger({
+    action: "CREATE",
+    module: "Reports",
+    description: "Vehicle Report Generated",
+    request: req,
+    status: "SUCCESS"
+  });
   return res.status(200).json({
     success: true,
     message: "Report fetched successfully.",
@@ -14,6 +22,13 @@ export const getVehicleReport = asyncHandler(async (req, res) => {
 
 export const getDriverReport = asyncHandler(async (req, res) => {
   const data = await reportService.getDriverReport(req.query);
+  await auditLogger({
+    action: "CREATE",
+    module: "Reports",
+    description: "Driver Report Generated",
+    request: req,
+    status: "SUCCESS"
+  });
   return res.status(200).json({
     success: true,
     message: "Report fetched successfully.",
@@ -25,6 +40,13 @@ export const getDriverReport = asyncHandler(async (req, res) => {
 
 export const getTripReport = asyncHandler(async (req, res) => {
   const data = await reportService.getTripReport(req.query);
+  await auditLogger({
+    action: "CREATE",
+    module: "Reports",
+    description: "Trip Report Generated",
+    request: req,
+    status: "SUCCESS"
+  });
   return res.status(200).json({
     success: true,
     message: "Report fetched successfully.",
@@ -36,6 +58,13 @@ export const getTripReport = asyncHandler(async (req, res) => {
 
 export const getFuelReport = asyncHandler(async (req, res) => {
   const data = await reportService.getFuelReport(req.query);
+  await auditLogger({
+    action: "CREATE",
+    module: "Reports",
+    description: "Fuel Report Generated",
+    request: req,
+    status: "SUCCESS"
+  });
   return res.status(200).json({
     success: true,
     message: "Report fetched successfully.",

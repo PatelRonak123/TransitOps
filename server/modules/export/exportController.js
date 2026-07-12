@@ -1,5 +1,6 @@
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { exportService } from "./exportService.js";
+import { auditLogger } from "../../utils/auditLogger.js";
 
 export const exportReport = asyncHandler(async (req, res) => {
   const { moduleName, format } = req.params;
@@ -21,4 +22,12 @@ export const exportReport = asyncHandler(async (req, res) => {
     req.query,
     req.user
   );
+
+  await auditLogger({
+    action: "EXPORT",
+    module: "Export",
+    description: `Report exported as ${format.toUpperCase()}: ${moduleName}`,
+    request: req,
+    status: "SUCCESS"
+  });
 });

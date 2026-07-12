@@ -12,6 +12,8 @@ import expenseRoutes from "./modules/expense/expenseRoute.js";
 import dashboardRoutes from "./modules/dashboard/dashboardRoute.js";
 import reportRoutes from "./modules/report/reportRoute.js";
 import exportRoutes from "./modules/export/exportRoute.js";
+import auditRoutes from "./modules/audit/auditRoute.js";
+import { attachRequestMetadata } from "./middleware/auditMiddleware.js";
 import { ErrorHandler } from "./utils/ErrorHandler.js";
 import { ENV } from "./config/env.js";
 
@@ -29,6 +31,7 @@ app.use(corsPreflight);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(attachRequestMetadata);
 app.use("/uploads", express.static(path.resolve("uploads")));
 
 // Route Registration
@@ -42,6 +45,7 @@ app.use("/api/expenses", expenseRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/export", exportRoutes);
+app.use("/api/audit", auditRoutes);
 
 app.get("/health", (req, res) => {
   res.send("Server is running and healthy!");
