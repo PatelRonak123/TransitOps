@@ -79,15 +79,18 @@ export const VehicleTable = ({ vehicles = [], loading = false, onEdit, onDelete 
                     <FaEdit />
                   </button>
 
-                  {vehicle.status !== "On Trip" ? (
-                    <button
-                      onClick={() => onDelete(vehicle)}
-                      className="rounded-lg p-2 text-red-500 transition hover:bg-red-50 hover:text-red-700"
-                      title="Delete Vehicle"
-                    >
-                      <FaTrash />
-                    </button>
-                  ) : null}
+                  <button
+                    onClick={() => vehicle.status !== "On Trip" && onDelete(vehicle)}
+                    disabled={vehicle.status === "On Trip"}
+                    className={`rounded-lg p-2 transition ${
+                      vehicle.status === "On Trip"
+                        ? "cursor-not-allowed text-gray-400"
+                        : "text-red-500 hover:bg-red-50 hover:text-red-700"
+                    }`}
+                    title={vehicle.status === "On Trip" ? "Cannot delete a vehicle on trip" : "Delete Vehicle"}
+                  >
+                    <FaTrash />
+                  </button>
                 </div>
               </td>
             </tr>

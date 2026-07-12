@@ -6,6 +6,7 @@ import CompleteTripModal from "../components/CompleteTripModal";
 import TripFilters from "../components/TripFilters";
 import TripTable from "../components/TripTable";
 import useTrips from "../hooks/useTrips";
+import ConfirmationModal from "../../../components/ui/ConfirmationModal";
 
 const StatCard = ({ label, value }) => (
   <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
@@ -20,6 +21,8 @@ export const Trips = () => {
 
   const [openModal, setOpenModal] = useState(false);
   const [completeOpen, setCompleteOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmAction, setConfirmAction] = useState(null);
   const [selectedTrip, setSelectedTrip] = useState(null);
   const [filters, setFilters] = useState({ search: searchParam, status: "", start_date: "", end_date: "" });
   const [submitting, setSubmitting] = useState(false);
@@ -69,10 +72,10 @@ export const Trips = () => {
     }
   };
 
-  const handleDispatchTrip = async (trip) => {
-    if (window.confirm(`Dispatch ${trip.trip_number}?`)) {
-      await dispatchTrip(trip.id);
-    }
+  const handleDispatchTrip = (trip) => {
+    setSelectedTrip(trip);
+    setConfirmAction({ type: "dispatch", trip });
+    setConfirmOpen(true);
   };
 
   const handleCompleteClick = (trip) => {
@@ -93,16 +96,38 @@ export const Trips = () => {
     }
   };
 
-  const handleCancelTrip = async (trip) => {
-    if (window.confirm(`Cancel ${trip.trip_number}?`)) {
-      await cancelTrip(trip.id);
-    }
+  const handleCancelTrip = (trip) => {
+    setSelectedTrip(trip);
+    setConfirmAction({ type: "cancel", trip });
+    setConfirmOpen(true);
   };
 
-  const handleDeleteTrip = async (trip) => {
-    if (window.confirm(`Delete ${trip.trip_number}? This action cannot be undone.`)) {
-      await removeTrip(trip.id);
+  const handleDeleteTrip = (trip) => {
+    setSelectedTrip(trip);
+    setConfirmAction({ type: "delete", trip });
+    setConfirmOpen(true);
+  };
+
+  const confirmTripAction = async () => {
+    if (!selectedTrip?.id) return;
+
+    switch (confirmAction?.type) {
+      case "dispatch":
+        await dispatchTrip(selectedTrip.id);
+        break;
+      case "cancel":
+        await cancelTrip(selectedTrip.id);
+        break;
+      case "delete":
+        await removeTrip(selectedTrip.id);
+        break;
+      default:
+        break;
     }
+
+    setConfirmOpen(false);
+    setConfirmAction(null);
+    setSelectedTrip(null);
   };
 
   return (
@@ -169,6 +194,32 @@ export const Trips = () => {
         }}
         onSubmit={handleCompleteTrip}
         submitting={submitting}
+      />
+
+      <ConfirmationModal
+        open={confirmOpen}
+        onClose={() => {
+          setConfirmOpen(false);
+          setConfirmAction(null);
+          setSelectedTrip(null);
+        }}
+        onConfirm={confirmTripAction}
+        title={
+          confirmAction?.type === "dispatch"
+            ? "Dispatch Trip"
+            : confirmAction?.type === "cancel"
+              ? "Cancel Trip"
+              : "Delete Trip"
+        }
+        message={
+          confirmAction?.type === "dispatch"
+            ? `Are you sure you want to dispatch ${selectedTrip?.trip_number || "this trip"}?`
+            : confirmAction?.type === "cancel"
+              ? `Are you sure you want to cancel ${selectedTrip?.trip_number || "this trip"}?`
+              : `Are you sure you want to delete ${selectedTrip?.trip_number || "this trip"}? This action cannot be undone.`
+        }
+        confirmText={confirmAction?.type === "dispatch" ? "Dispatch" : confirmAction?.type === "cancel" ? "Cancel" : "Delete"}
+        variant={confirmAction?.type === "delete" ? "danger" : "info"}
       />
     </MainLayout>
   );

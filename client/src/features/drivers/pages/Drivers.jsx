@@ -6,6 +6,7 @@ import { DriverTable } from "../components/DriverTable";
 import AddDriverModal from "../components/AddDriverModal";
 import DeleteDriverModal from "../components/DeleteDriverModal";
 import useDrivers from "../hooks/useDrivers";
+import ConfirmationModal from "../../../components/ui/ConfirmationModal";
 
 export const Drivers = () => {
   const [searchParams] = useSearchParams();
@@ -13,6 +14,7 @@ export const Drivers = () => {
 
   const [openModal, setOpenModal] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState(null);
   const [filters, setFilters] = useState({ search: searchParam, status: "", license_category: "" });
   const [submitting, setSubmitting] = useState(false);
@@ -27,11 +29,12 @@ export const Drivers = () => {
     setDeleteOpen(true);
   };
 
-  const confirmDelete = async () => {
+  const handleConfirmDelete = async () => {
     if (!selectedDriver?.id) return;
 
     await removeDriver(selectedDriver.id);
     setDeleteOpen(false);
+    setConfirmOpen(false);
     setSelectedDriver(null);
   };
   useEffect(() => {
@@ -49,12 +52,6 @@ export const Drivers = () => {
       setOpenModal(false);
     } finally {
       setSubmitting(false);
-    }
-  };
-
-  const handleDeleteDriver = async (driverId) => {
-    if (window.confirm("Delete this driver?")) {
-      await removeDriver(driverId);
     }
   };
 
@@ -115,8 +112,22 @@ export const Drivers = () => {
           setDeleteOpen(false);
           setSelectedDriver(null);
         }}
-        onConfirm={confirmDelete}
+        onConfirm={() => setConfirmOpen(true)}
         driver={selectedDriver}
+      />
+
+      <ConfirmationModal
+        open={confirmOpen}
+        onClose={() => {
+          setConfirmOpen(false);
+          setDeleteOpen(false);
+          setSelectedDriver(null);
+        }}
+        onConfirm={handleConfirmDelete}
+        title="Delete Driver"
+        message={`Are you sure you want to delete ${selectedDriver?.full_name || selectedDriver?.name || "this driver"}? This action cannot be undone.`}
+        confirmText="Delete"
+        variant="danger"
       />
     </MainLayout>
   );

@@ -4,6 +4,7 @@ import MainLayout from "../../../components/layout/MainLayout";
 import VehicleFilters from "../components/VehicleFilters";
 import VehicleModal from "../components/VehicleModal";
 import VehicleTable from "../components/VehicleTable";
+import DeleteVehicleModal from "../components/DeleteVehicleModal";
 import useVehicles from "../hooks/useVehicles";
 
 const StatCard = ({ label, value }) => (
@@ -18,6 +19,7 @@ export const Vehicles = () => {
   const searchParam = searchParams.get("search") || "";
 
   const [modalOpen, setModalOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [filters, setFilters] = useState({ search: searchParam, status: "", vehicle_type: "", region: "" });
   const [submitting, setSubmitting] = useState(false);
@@ -81,10 +83,17 @@ export const Vehicles = () => {
     }
   };
 
-  const handleDeleteVehicle = async (vehicle) => {
-    if (window.confirm(`Delete ${vehicle.registration_number}? This action cannot be undone.`)) {
-      await removeVehicle(vehicle.id);
-    }
+  const handleDeleteClick = (vehicle) => {
+    setSelectedVehicle(vehicle);
+    setDeleteOpen(true);
+  };
+
+  const confirmDeleteVehicle = async () => {
+    if (!selectedVehicle?.id) return;
+
+    await removeVehicle(selectedVehicle.id);
+    setDeleteOpen(false);
+    setSelectedVehicle(null);
   };
 
   return (
@@ -122,7 +131,7 @@ export const Vehicles = () => {
           vehicles={vehicles}
           loading={loading}
           onEdit={handleEditClick}
-          onDelete={handleDeleteVehicle}
+          onDelete={handleDeleteClick}
         />
 
         <div className="text-sm text-gray-500">
@@ -140,6 +149,16 @@ export const Vehicles = () => {
           submitting={submitting}
         />
       ) : null}
+
+      <DeleteVehicleModal
+        open={deleteOpen}
+        onClose={() => {
+          setDeleteOpen(false);
+          setSelectedVehicle(null);
+        }}
+        onConfirm={confirmDeleteVehicle}
+        vehicle={selectedVehicle}
+      />
     </MainLayout>
   );
 };

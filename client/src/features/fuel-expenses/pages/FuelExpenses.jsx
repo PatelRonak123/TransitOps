@@ -5,11 +5,14 @@ import FuelExpenseTable from "../components/FuelExpenseTable";
 import FuelExpenseModal from "../components/FuelExpenseModal";
 import useFuelExpenses from "../hooks/useFuelExpenses";
 import useTrips from "../../trips/hooks/useTrips";
+import ConfirmationModal from "../../../components/ui/ConfirmationModal";
 
 const FuelExpenses = () => {
   const [activeTab, setActiveTab] = useState("fuel");
   const [filters, setFilters] = useState({ search: "", type: "", payment_status: "" });
   const [modalOpen, setModalOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const { fuelLogs, expenses, fuelStats, expenseStats, loading, error, fetchData, createFuel, createExpenseEntry, deleteFuel, deleteExpense } = useFuelExpenses();
   const { trips, vehicles, fetchTrips, fetchReferenceData } = useTrips();
@@ -41,14 +44,22 @@ const FuelExpenses = () => {
     }
   };
 
-  const handleDelete = async (record) => {
-    if (!window.confirm("Delete this record?")) return;
+  const handleDelete = (record) => {
+    setSelectedRecord(record);
+    setDeleteOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!selectedRecord?.id) return;
 
     if (activeTab === "fuel") {
-      await deleteFuel(record.id);
+      await deleteFuel(selectedRecord.id);
     } else {
-      await deleteExpense(record.id);
+      await deleteExpense(selectedRecord.id);
     }
+
+    setDeleteOpen(false);
+    setSelectedRecord(null);
   };
 
   return (
@@ -100,6 +111,19 @@ const FuelExpenses = () => {
         mode={activeTab === "fuel" ? "fuel" : "expense"}
         trips={trips}
         vehicles={vehicles}
+      />
+
+      <ConfirmationModal
+        open={deleteOpen}
+        onClose={() => {
+          setDeleteOpen(false);
+          setSelectedRecord(null);
+        }}
+        onConfirm={confirmDelete}
+        title={activeTab === "fuel" ? "Delete Fuel Log" : "Delete Expense"}
+        message={`Are you sure you want to delete this ${activeTab === "fuel" ? "fuel log" : "expense"}? This action cannot be undone.`}
+        confirmText="Delete"
+        variant="danger"
       />
     </MainLayout>
   );

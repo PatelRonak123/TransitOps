@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import MainLayout from "../../../components/layout/MainLayout";
 import reportService from "../service/reportService";
+import ConfirmationModal from "../../../components/ui/ConfirmationModal";
 
 const reportCategories = [
   { id: "vehicles", label: "Vehicles", icon: <Truck className="h-4 w-4" /> },
@@ -45,6 +46,8 @@ const Reports = () => {
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(null); // 'pdf', 'excel', 'csv'
   const [error, setError] = useState(null);
+  const [errorModalOpen, setErrorModalOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // Filter States
   const [from, setFrom] = useState("");
@@ -105,7 +108,8 @@ const Reports = () => {
       link.remove();
     } catch (err) {
       console.error("Export Error:", err);
-      alert("Failed to export report. Please try again.");
+      setErrorMessage("Failed to export report. Please try again.");
+      setErrorModalOpen(true);
     } finally {
       setExporting(null);
     }
