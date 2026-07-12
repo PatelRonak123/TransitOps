@@ -187,3 +187,134 @@ export const validateUpdateVehicle = (req, res, next) => {
 
   next();
 };
+
+export const validateCreateDriver = (req, res, next) => {
+  if (!req.body || typeof req.body !== "object") {
+    throw new ApiError(400, "Request body is required", "VALIDATION_ERROR");
+  }
+
+  const {
+    full_name,
+    license_number,
+    license_category,
+    license_expiry_date,
+    contact_number,
+    email,
+    safety_score,
+    status
+  } = req.body;
+
+  if (!full_name || typeof full_name !== "string" || full_name.trim().length < 2) {
+    throw new ApiError(400, "Full name must be at least 2 characters long", "VALIDATION_ERROR");
+  }
+  req.body.full_name = full_name.trim();
+
+  if (!license_number || typeof license_number !== "string" || license_number.trim() === "") {
+    throw new ApiError(400, "License number is required", "VALIDATION_ERROR");
+  }
+  req.body.license_number = license_number.trim().toUpperCase();
+
+  const allowedCategories = ["LMV", "HMV", "MCWG", "Transport", "Heavy Transport"];
+  if (!license_category || typeof license_category !== "string" || !allowedCategories.includes(license_category)) {
+    throw new ApiError(400, `Invalid license category. Allowed categories: ${allowedCategories.join(", ")}`, "VALIDATION_ERROR");
+  }
+
+  if (!license_expiry_date || isNaN(Date.parse(license_expiry_date))) {
+    throw new ApiError(400, "A valid license expiry date is required", "VALIDATION_ERROR");
+  }
+
+  if (!contact_number || typeof contact_number !== "string" || !/^\d{10,15}$/.test(contact_number.trim())) {
+    throw new ApiError(400, "Contact number must be between 10 and 15 digits", "VALIDATION_ERROR");
+  }
+  req.body.contact_number = contact_number.trim();
+
+  if (email !== undefined && email !== null && email !== "") {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (typeof email !== "string" || !emailRegex.test(email.trim())) {
+      throw new ApiError(400, "Invalid email format", "VALIDATION_ERROR");
+    }
+    req.body.email = email.trim();
+  }
+
+  if (safety_score !== undefined && safety_score !== null) {
+    const score = Number(safety_score);
+    if (!Number.isInteger(score) || score < 0 || score > 100) {
+      throw new ApiError(400, "Safety score must be an integer between 0 and 100", "VALIDATION_ERROR");
+    }
+    req.body.safety_score = score;
+  } else {
+    req.body.safety_score = 100;
+  }
+
+  const allowedStatuses = ["Available", "On Trip", "Off Duty", "Suspended"];
+  if (status !== undefined && status !== null) {
+    if (typeof status !== "string" || !allowedStatuses.includes(status)) {
+      throw new ApiError(400, `Invalid status. Allowed statuses: ${allowedStatuses.join(", ")}`, "VALIDATION_ERROR");
+    }
+  } else {
+    req.body.status = "Available";
+  }
+
+  next();
+};
+
+export const validateUpdateDriver = (req, res, next) => {
+  if (!req.body || typeof req.body !== "object") {
+    throw new ApiError(400, "Request body is required", "VALIDATION_ERROR");
+  }
+
+  const {
+    full_name,
+    contact_number,
+    email,
+    safety_score,
+    status,
+    license_expiry_date
+  } = req.body;
+
+  if (full_name !== undefined) {
+    if (typeof full_name !== "string" || full_name.trim().length < 2) {
+      throw new ApiError(400, "Full name must be at least 2 characters long", "VALIDATION_ERROR");
+    }
+    req.body.full_name = full_name.trim();
+  }
+
+  if (contact_number !== undefined) {
+    if (typeof contact_number !== "string" || !/^\d{10,15}$/.test(contact_number.trim())) {
+      throw new ApiError(400, "Contact number must be between 10 and 15 digits", "VALIDATION_ERROR");
+    }
+    req.body.contact_number = contact_number.trim();
+  }
+
+  if (email !== undefined && email !== null && email !== "") {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (typeof email !== "string" || !emailRegex.test(email.trim())) {
+      throw new ApiError(400, "Invalid email format", "VALIDATION_ERROR");
+    }
+    req.body.email = email.trim();
+  }
+
+  if (safety_score !== undefined) {
+    const score = Number(safety_score);
+    if (!Number.isInteger(score) || score < 0 || score > 100) {
+      throw new ApiError(400, "Safety score must be an integer between 0 and 100", "VALIDATION_ERROR");
+    }
+    req.body.safety_score = score;
+  }
+
+  if (status !== undefined) {
+    const allowedStatuses = ["Available", "On Trip", "Off Duty", "Suspended"];
+    if (typeof status !== "string" || !allowedStatuses.includes(status)) {
+      throw new ApiError(400, `Invalid status. Allowed statuses: ${allowedStatuses.join(", ")}`, "VALIDATION_ERROR");
+    }
+  }
+
+  if (license_expiry_date !== undefined) {
+    if (isNaN(Date.parse(license_expiry_date))) {
+      throw new ApiError(400, "Invalid license expiry date", "VALIDATION_ERROR");
+    }
+  }
+
+  next();
+};
+
