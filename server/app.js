@@ -9,6 +9,8 @@ import tripRoutes from "./modules/trip/tripRoute.js";
 import maintenanceRoutes from "./modules/maintenance/maintenanceRoute.js";
 import fuelRoutes from "./modules/fuel/fuelRoute.js";
 import expenseRoutes from "./modules/expense/expenseRoute.js";
+import dashboardRoutes from "./modules/dashboard/dashboardRoute.js";
+import reportRoutes from "./modules/report/reportRoute.js";
 import { ErrorHandler } from "./utils/ErrorHandler.js";
 import { ENV } from "./config/env.js";
 
@@ -36,6 +38,8 @@ app.use("/api/trips", tripRoutes);
 app.use("/api/maintenance", maintenanceRoutes);
 app.use("/api/fuel", fuelRoutes);
 app.use("/api/expenses", expenseRoutes);
+app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/reports", reportRoutes);
 
 app.get("/health", (req, res) => {
   res.send("Server is running and healthy!");
