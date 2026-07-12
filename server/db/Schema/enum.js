@@ -37,3 +37,11 @@ export const driverStatusEnum = pgEnum("driver_status", [
   "Suspended"
 ]);
 
+export const tripStatusEnum = pgEnum("trip_status", [
+  "Draft",
+  "Dispatched",
+  "Completed",
+  "Cancelled"
+]);
+
+

@@ -318,3 +318,130 @@ export const validateUpdateDriver = (req, res, next) => {
   next();
 };
 
+export const validateCreateTrip = (req, res, next) => {
+  if (!req.body || typeof req.body !== "object") {
+    throw new ApiError(400, "Request body is required", "VALIDATION_ERROR");
+  }
+
+  const { vehicle_id, driver_id, source, destination, cargo_weight, planned_distance, revenue } = req.body;
+
+  if (!vehicle_id || typeof vehicle_id !== "string") {
+    throw new ApiError(400, "Vehicle ID is required", "VALIDATION_ERROR");
+  }
+
+  if (!driver_id || typeof driver_id !== "string") {
+    throw new ApiError(400, "Driver ID is required", "VALIDATION_ERROR");
+  }
+
+  if (!source || typeof source !== "string" || source.trim() === "") {
+    throw new ApiError(400, "Source is required", "VALIDATION_ERROR");
+  }
+  req.body.source = source.trim();
+
+  if (!destination || typeof destination !== "string" || destination.trim() === "") {
+    throw new ApiError(400, "Destination is required", "VALIDATION_ERROR");
+  }
+  req.body.destination = destination.trim();
+
+  const cargo = Number(cargo_weight);
+  if (cargo_weight === undefined || cargo_weight === null || isNaN(cargo) || cargo <= 0) {
+    throw new ApiError(400, "Cargo weight must be a positive number", "VALIDATION_ERROR");
+  }
+  req.body.cargo_weight = cargo;
+
+  if (planned_distance !== undefined && planned_distance !== null) {
+    const distance = Number(planned_distance);
+    if (isNaN(distance) || distance <= 0) {
+      throw new ApiError(400, "Planned distance must be a positive number", "VALIDATION_ERROR");
+    }
+    req.body.planned_distance = distance;
+  }
+
+  if (revenue !== undefined && revenue !== null) {
+    const rev = Number(revenue);
+    if (isNaN(rev) || rev < 0) {
+      throw new ApiError(400, "Revenue must be a non-negative number", "VALIDATION_ERROR");
+    }
+    req.body.revenue = rev;
+  }
+
+  next();
+};
+
+export const validateUpdateTrip = (req, res, next) => {
+  if (!req.body || typeof req.body !== "object") {
+    throw new ApiError(400, "Request body is required", "VALIDATION_ERROR");
+  }
+
+  const { source, destination, cargo_weight, planned_distance, revenue } = req.body;
+
+  if (source !== undefined) {
+    if (typeof source !== "string" || source.trim() === "") {
+      throw new ApiError(400, "Source cannot be empty", "VALIDATION_ERROR");
+    }
+    req.body.source = source.trim();
+  }
+
+  if (destination !== undefined) {
+    if (typeof destination !== "string" || destination.trim() === "") {
+      throw new ApiError(400, "Destination cannot be empty", "VALIDATION_ERROR");
+    }
+    req.body.destination = destination.trim();
+  }
+
+  if (cargo_weight !== undefined) {
+    const cargo = Number(cargo_weight);
+    if (isNaN(cargo) || cargo <= 0) {
+      throw new ApiError(400, "Cargo weight must be a positive number", "VALIDATION_ERROR");
+    }
+    req.body.cargo_weight = cargo;
+  }
+
+  if (planned_distance !== undefined) {
+    const distance = Number(planned_distance);
+    if (isNaN(distance) || distance <= 0) {
+      throw new ApiError(400, "Planned distance must be a positive number", "VALIDATION_ERROR");
+    }
+    req.body.planned_distance = distance;
+  }
+
+  if (revenue !== undefined) {
+    const rev = Number(revenue);
+    if (isNaN(rev) || rev < 0) {
+      throw new ApiError(400, "Revenue must be a non-negative number", "VALIDATION_ERROR");
+    }
+    req.body.revenue = rev;
+  }
+
+  next();
+};
+
+export const validateCompleteTripBody = (req, res, next) => {
+  if (!req.body || typeof req.body !== "object") {
+    throw new ApiError(400, "Request body is required", "VALIDATION_ERROR");
+  }
+
+  const { end_odometer, actual_distance, fuel_consumed } = req.body;
+
+  const endOdo = Number(end_odometer);
+  if (end_odometer === undefined || end_odometer === null || isNaN(endOdo) || endOdo <= 0) {
+    throw new ApiError(400, "End odometer must be a positive number", "VALIDATION_ERROR");
+  }
+  req.body.end_odometer = endOdo;
+
+  const actualDist = Number(actual_distance);
+  if (actual_distance === undefined || actual_distance === null || isNaN(actualDist) || actualDist <= 0) {
+    throw new ApiError(400, "Actual distance must be a positive number", "VALIDATION_ERROR");
+  }
+  req.body.actual_distance = actualDist;
+
+  const fuel = Number(fuel_consumed);
+  if (fuel_consumed === undefined || fuel_consumed === null || isNaN(fuel) || fuel < 0) {
+    throw new ApiError(400, "Fuel consumed must be a non-negative number", "VALIDATION_ERROR");
+  }
+  req.body.fuel_consumed = fuel;
+
+  next();
+};
+
+
