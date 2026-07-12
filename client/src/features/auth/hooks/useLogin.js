@@ -19,6 +19,8 @@ export default function useLogin() {
             const response = await authService.login({
                 email: data.email.trim(),
                 password: data.password,
+                role: data.role,
+                rememberMe: Boolean(data.rememberMe),
             });
 
             if (response?.user) {
