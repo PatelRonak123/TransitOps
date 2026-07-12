@@ -34,7 +34,7 @@ const MaintenanceTable = ({ records = [], loading = false, onStart, onComplete, 
               <td>{record.maintenance_type}</td>
               <td>{record.priority}</td>
               <td>{record.status}</td>
-              <td>${Number(record.estimated_cost || 0).toFixed(2)}</td>
+              <td>₹{Number(record.estimated_cost || 0).toFixed(2)}</td>
               <td>
                 <div className="flex justify-center gap-2">
                   <button onClick={() => onStart(record.id)} className="rounded-lg p-2 text-blue-500 transition hover:bg-blue-50" title="Start maintenance">

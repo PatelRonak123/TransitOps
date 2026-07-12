@@ -74,7 +74,7 @@ const FuelExpenses = () => {
           </div>
           <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
             <p className="text-sm text-gray-500">{activeTab === "fuel" ? "Total Fuel Cost" : "Total Expenses"}</p>
-            <p className="mt-2 text-2xl font-semibold text-slate-800">${(stats?.totalFuelCost || stats?.totalExpenses || 0).toFixed(2)}</p>
+            <p className="mt-2 text-2xl font-semibold text-slate-800">₹{(stats?.totalFuelCost || stats?.totalExpenses || 0).toFixed(2)}</p>
           </div>
           <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
             <p className="text-sm text-gray-500">Pending</p>

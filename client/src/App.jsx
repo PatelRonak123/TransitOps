@@ -52,9 +52,9 @@ function AppRoutes() {
                 path="/maintenance"
                 element={isAuthenticated ? <Maintenance /> : <Navigate to="/" replace />}
             />
-            <Route
-                path="/fuel-expenses"
-                element={isAuthenticated ? <FuelExpenses /> : <Navigate to="/" replace />}
+            <Route 
+                path="/fuel-expenses" 
+                element={isAuthenticated ? <FuelExpenses /> : <Navigate to="/" replace />} 
             />
         </Routes>
     )

@@ -14,7 +14,7 @@ import {
   Route,
   Wrench,
   Fuel,
-  DollarSign,
+  IndianRupee,
   ChevronLeft,
   ChevronRight
 } from "lucide-react";
@@ -27,7 +27,7 @@ const reportCategories = [
   { id: "trips", label: "Trips", icon: <Route className="h-4 w-4" /> },
   { id: "fuel", label: "Fuel Logs", icon: <Fuel className="h-4 w-4" /> },
   { id: "maintenance", label: "Maintenance", icon: <Wrench className="h-4 w-4" /> },
-  { id: "expenses", label: "Expenses", icon: <DollarSign className="h-4 w-4" /> }
+  { id: "expenses", label: "Expenses", icon: <IndianRupee className="h-4 w-4" /> }
 ];
 
 const containerVariants = {
@@ -268,7 +268,7 @@ const Reports = () => {
             <td className="px-6 py-4 font-semibold text-slate-700">#{row.fuel_log_number || row.fuelLogNumber}</td>
             <td className="px-6 py-4 text-slate-600">{row.vehicle?.registration_number || "-"}</td>
             <td className="px-6 py-4 text-slate-600 font-medium">{row.liters} L</td>
-            <td className="px-6 py-4 text-emerald-600 font-semibold">${row.total_cost || row.totalCost || 0}</td>
+            <td className="px-6 py-4 text-emerald-600 font-semibold">₹{row.total_cost || row.totalCost || 0}</td>
             <td className="px-6 py-4 text-slate-500">{row.fuel_station || row.fuelStation}</td>
             <td className="px-6 py-4 text-slate-600">{new Date(row.fuel_date || row.fuelDate).toLocaleDateString()}</td>
           </tr>
@@ -279,7 +279,7 @@ const Reports = () => {
             <td className="px-6 py-4 font-semibold text-slate-700">#{row.maintenance_number || row.maintenanceNumber}</td>
             <td className="px-6 py-4 text-slate-600">{row.vehicle?.registration_number || "-"}</td>
             <td className="px-6 py-4 text-slate-500">{row.maintenance_type || row.maintenanceType}</td>
-            <td className="px-6 py-4 text-emerald-600 font-semibold">${row.actual_cost || row.estimated_cost || 0}</td>
+            <td className="px-6 py-4 text-emerald-600 font-semibold">₹{row.actual_cost || row.estimated_cost || 0}</td>
             <td className="px-6 py-4">
               <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
                 row.priority === "High" ? "bg-rose-50 text-rose-700" :
@@ -305,7 +305,7 @@ const Reports = () => {
             <td className="px-6 py-4 font-semibold text-slate-700">#{row.expense_number || row.expenseNumber}</td>
             <td className="px-6 py-4 text-slate-500 font-medium">{row.expense_type || row.expenseType}</td>
             <td className="px-6 py-4 text-slate-600 max-w-xs truncate">{row.title}</td>
-            <td className="px-6 py-4 text-emerald-600 font-bold">${row.amount}</td>
+            <td className="px-6 py-4 text-emerald-600 font-bold">₹{row.amount}</td>
             <td className="px-6 py-4">
               <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
                 row.payment_status === "Paid" ? "bg-emerald-50 text-emerald-700" :
@@ -381,7 +381,7 @@ const Reports = () => {
             </div>
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Revenue</p>
-              <p className="mt-2 text-2xl font-bold text-emerald-600">${(summary.totalRevenue || 0).toLocaleString()}</p>
+              <p className="mt-2 text-2xl font-bold text-emerald-600">₹{(summary.totalRevenue || 0).toLocaleString()}</p>
             </div>
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Distance Covered</p>
@@ -398,7 +398,7 @@ const Reports = () => {
             </div>
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Fuel Expenditures</p>
-              <p className="mt-2 text-2xl font-bold text-rose-500">${(summary.totalCost || 0).toLocaleString()}</p>
+              <p className="mt-2 text-2xl font-bold text-rose-500">₹{(summary.totalCost || 0).toLocaleString()}</p>
             </div>
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Average Fuel Efficiency</p>
@@ -419,7 +419,7 @@ const Reports = () => {
             </div>
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Repair Cost</p>
-              <p className="mt-2 text-2xl font-bold text-rose-500">${(summary.totalCost || 0).toLocaleString()}</p>
+              <p className="mt-2 text-2xl font-bold text-rose-500">₹{(summary.totalCost || 0).toLocaleString()}</p>
             </div>
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Active Shop Logs</p>
@@ -432,15 +432,15 @@ const Reports = () => {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Expenditures</p>
-              <p className="mt-2 text-2xl font-bold text-rose-500">${(summary.totalExpenses || 0).toLocaleString()}</p>
+              <p className="mt-2 text-2xl font-bold text-rose-500">₹{(summary.totalExpenses || 0).toLocaleString()}</p>
             </div>
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Fuel Cost Share</p>
-              <p className="mt-2 text-2xl font-bold text-slate-800">${(summary.fuelExpenses || 0).toLocaleString()}</p>
+              <p className="mt-2 text-2xl font-bold text-slate-800">₹{(summary.fuelExpenses || 0).toLocaleString()}</p>
             </div>
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Maintenance Cost Share</p>
-              <p className="mt-2 text-2xl font-bold text-slate-800">${(summary.maintenanceExpenses || 0).toLocaleString()}</p>
+              <p className="mt-2 text-2xl font-bold text-slate-800">₹{(summary.maintenanceExpenses || 0).toLocaleString()}</p>
             </div>
           </div>
         );

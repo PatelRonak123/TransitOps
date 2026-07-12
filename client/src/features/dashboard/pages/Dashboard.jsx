@@ -7,7 +7,7 @@ import {
   Wrench,
   AlertTriangle,
   Fuel,
-  DollarSign,
+  IndianRupee,
   Calendar,
   TrendingUp,
   RefreshCw,
@@ -388,16 +388,16 @@ const Dashboard = () => {
               <div>
                 <p className="text-slate-500 text-xs font-semibold tracking-wider uppercase">Total Expenses</p>
                 <h3 className="text-2xl font-extrabold text-slate-800 mt-2">
-                  ${summary?.expenses?.totalOperationalCost || 0}
+                  ₹{summary?.expenses?.totalOperationalCost || 0}
                 </h3>
               </div>
               <div className="rounded-xl bg-emerald-50 p-3 text-emerald-600">
-                <DollarSign className="h-6 w-6" />
+                <IndianRupee className="h-6 w-6" />
               </div>
             </div>
             <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
               <span>Fuel Cost</span>
-              <span className="font-semibold text-rose-500">${summary?.expenses?.fuelCost || 0}</span>
+              <span className="font-semibold text-rose-500">₹{summary?.expenses?.fuelCost || 0}</span>
             </div>
           </motion.div>
         </div>
@@ -467,7 +467,7 @@ const Dashboard = () => {
                 <p className="text-xs text-slate-400">Monthly breakdown of fuel logistics vs maintenance expenses</p>
               </div>
               <div className="text-xs text-slate-400 font-semibold">
-                Amounts in USD
+                Amounts in INR
               </div>
             </div>
             <div className="h-72">
