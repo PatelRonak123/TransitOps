@@ -490,5 +490,68 @@ export const dashboardService = {
         status: m.status
       }))
     };
+  },
+
+  searchSystem: async (query) => {
+    if (!query) return { vehicles: [], drivers: [], trips: [] };
+    const cleanQuery = `%${query}%`;
+
+    // Search Vehicles
+    const vehiclesResult = await db
+      .select({
+        id: vehicles.id,
+        vehicleName: vehicles.vehicleName,
+        registrationNumber: vehicles.registrationNumber,
+        status: vehicles.status
+      })
+      .from(vehicles)
+      .where(
+        and(
+          isNull(vehicles.deletedAt),
+          sql`(${vehicles.vehicleName} ILIKE ${cleanQuery} OR ${vehicles.registrationNumber} ILIKE ${cleanQuery} OR ${vehicles.vehicleModel} ILIKE ${cleanQuery})`
+        )
+      )
+      .limit(5);
+
+    // Search Drivers
+    const driversResult = await db
+      .select({
+        id: drivers.id,
+        fullName: drivers.fullName,
+        contactNumber: drivers.contactNumber,
+        status: drivers.status
+      })
+      .from(drivers)
+      .where(
+        and(
+          isNull(drivers.deletedAt),
+          sql`(${drivers.fullName} ILIKE ${cleanQuery} OR ${drivers.contactNumber} ILIKE ${cleanQuery})`
+        )
+      )
+      .limit(5);
+
+    // Search Trips
+    const tripsResult = await db
+      .select({
+        id: trips.id,
+        tripNumber: trips.tripNumber,
+        source: trips.source,
+        destination: trips.destination,
+        status: trips.status
+      })
+      .from(trips)
+      .where(
+        and(
+          isNull(trips.deletedAt),
+          sql`(${trips.tripNumber} ILIKE ${cleanQuery} OR ${trips.source} ILIKE ${cleanQuery} OR ${trips.destination} ILIKE ${cleanQuery})`
+        )
+      )
+      .limit(5);
+
+    return {
+      vehicles: vehiclesResult,
+      drivers: driversResult,
+      trips: tripsResult
+    };
   }
 };

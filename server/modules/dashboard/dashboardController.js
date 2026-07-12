@@ -62,3 +62,12 @@ export const getAlerts = asyncHandler(async (req, res) => {
     data
   });
 });
+
+export const searchSystem = asyncHandler(async (req, res) => {
+  const { q } = req.query;
+  const data = await dashboardService.searchSystem(q);
+  return res.status(200).json({
+    success: true,
+    data
+  });
+});
