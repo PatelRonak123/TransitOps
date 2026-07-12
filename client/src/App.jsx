@@ -9,6 +9,7 @@ import Drivers from "./features/drivers/pages/Drivers";
 import Reports from "./features/reports/pages/Reports";
 import Settings from "./features/settings/pages/Settings";
 import FuelExpenses from "./features/fuel-expenses/pages/FuelExpenses";
+import Maintenance from "./features/maintenance/pages/Maintenance";
 
 function AppRoutes() {
     const { isAuthenticated, isLoading } = useAuth()
@@ -39,7 +40,7 @@ function AppRoutes() {
                 path="/settings" 
                 element={isAuthenticated ? <Settings /> : <Navigate to="/" replace />} 
             />
-            /* <Route
+            <Route
                 path="/vehicles"
                 element={isAuthenticated ? <Vehicles /> : <Navigate to="/" replace />}
             />
@@ -48,12 +49,12 @@ function AppRoutes() {
                 element={isAuthenticated ? <Trips /> : <Navigate to="/" replace />}
             />
             <Route
-                path="/vehicles"
-                element={isAuthenticated ? <Vehicles /> : <Navigate to="/" replace />}
+                path="/maintenance"
+                element={isAuthenticated ? <Maintenance /> : <Navigate to="/" replace />}
             />
-            <Route 
-                path="/fuel-expenses" 
-                element={isAuthenticated ? <FuelExpenses /> : <Navigate to="/" replace />} 
+            <Route
+                path="/fuel-expenses"
+                element={isAuthenticated ? <FuelExpenses /> : <Navigate to="/" replace />}
             />
         </Routes>
     )
