@@ -6,7 +6,6 @@ import { hashPassword, comparePassword } from "../utils/password.js";
 import { generateToken } from "../utils/jwt.js";
 import { ENV } from "../config/env.js";
 
-
 export const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
@@ -50,7 +49,6 @@ export const login = asyncHandler(async (req, res) => {
   return res.status(200).json(responseData);
 });
 
-
 export const logout = asyncHandler(async (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,
@@ -64,7 +62,6 @@ export const logout = asyncHandler(async (req, res) => {
   });
 });
 
-
 export const getCurrentUser = asyncHandler(async (req, res) => {
   // req.user has already been populated and sanitized by verifyJWT middleware
   return res.status(200).json({
@@ -77,7 +74,6 @@ export const getCurrentUser = asyncHandler(async (req, res) => {
     },
   });
 });
-
 
 export const register = asyncHandler(async (req, res) => {
   const { email, password, full_name, role } = req.body;

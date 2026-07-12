@@ -3,6 +3,7 @@ import path from "path";
 import cookieParser from "cookie-parser";
 import { corsMiddleware, corsPreflight } from "./config/corsConfig.js";
 import authRoutes from "./routes/authRoute.js";
+import vehicleRoutes from "./modules/vehicle/vehicleRoute.js";
 import { ErrorHandler } from "./utils/ErrorHandler.js";
 import { ENV } from "./config/env.js";
 
@@ -20,10 +21,11 @@ app.use(corsPreflight);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use("/uploads", express.static(path.resolve("uploads")));
+
 
 // Route Registration
 app.use("/api/auth", authRoutes);
+app.use("/api/vehicles", vehicleRoutes);
 
 app.get("/health", (req, res) => {
   res.send("Server is running and healthy!");

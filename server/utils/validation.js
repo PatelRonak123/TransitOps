@@ -59,3 +59,124 @@ export const validateRegister = (req, res, next) => {
 
   next();
 };
+
+export const validateCreateVehicle = (req, res, next) => {
+  const {
+    registration_number,
+    vehicle_name,
+    vehicle_type,
+    max_load_capacity,
+    odometer,
+    acquisition_cost,
+    status
+  } = req.body;
+
+  if (!registration_number || typeof registration_number !== "string" || registration_number.trim() === "") {
+    throw new ApiError(400, "Registration number is required", "VALIDATION_ERROR");
+  }
+  req.body.registration_number = registration_number.trim().toUpperCase();
+
+  if (!vehicle_name || typeof vehicle_name !== "string" || vehicle_name.trim().length < 2) {
+    throw new ApiError(400, "Vehicle name must be at least 2 characters long", "VALIDATION_ERROR");
+  }
+  req.body.vehicle_name = vehicle_name.trim();
+
+  const allowedTypes = ["Truck", "Van", "Pickup", "Trailer", "Mini Truck"];
+  if (!vehicle_type || typeof vehicle_type !== "string" || !allowedTypes.includes(vehicle_type)) {
+    throw new ApiError(400, `Invalid vehicle type. Allowed types are: ${allowedTypes.join(", ")}`, "VALIDATION_ERROR");
+  }
+
+  const capacity = Number(max_load_capacity);
+  if (max_load_capacity === undefined || max_load_capacity === null || isNaN(capacity) || capacity <= 0) {
+    throw new ApiError(400, "Maximum load capacity must be a positive number", "VALIDATION_ERROR");
+  }
+  req.body.max_load_capacity = capacity;
+
+  if (odometer !== undefined && odometer !== null) {
+    const odo = Number(odometer);
+    if (isNaN(odo) || odo < 0) {
+      throw new ApiError(400, "Odometer reading cannot be negative", "VALIDATION_ERROR");
+    }
+    req.body.odometer = odo;
+  } else {
+    req.body.odometer = 0;
+  }
+
+  const cost = Number(acquisition_cost);
+  if (acquisition_cost === undefined || acquisition_cost === null || isNaN(cost) || cost < 0) {
+    throw new ApiError(400, "Acquisition cost must be a non-negative number", "VALIDATION_ERROR");
+  }
+  req.body.acquisition_cost = cost;
+
+  const allowedStatuses = ["Available", "On Trip", "In Shop", "Retired"];
+  if (status !== undefined && status !== null) {
+    if (typeof status !== "string" || !allowedStatuses.includes(status)) {
+      throw new ApiError(400, `Invalid status. Allowed statuses are: ${allowedStatuses.join(", ")}`, "VALIDATION_ERROR");
+    }
+  } else {
+    req.body.status = "Available";
+  }
+
+  next();
+};
+
+export const validateUpdateVehicle = (req, res, next) => {
+  const {
+    vehicle_name,
+    vehicle_type,
+    max_load_capacity,
+    capacity,
+    odometer,
+    acquisition_cost,
+    status
+  } = req.body;
+
+  if (vehicle_name !== undefined) {
+    if (typeof vehicle_name !== "string" || vehicle_name.trim().length < 2) {
+      throw new ApiError(400, "Vehicle name must be at least 2 characters long", "VALIDATION_ERROR");
+    }
+    req.body.vehicle_name = vehicle_name.trim();
+  }
+
+  if (vehicle_type !== undefined) {
+    const allowedTypes = ["Truck", "Van", "Pickup", "Trailer", "Mini Truck"];
+    if (typeof vehicle_type !== "string" || !allowedTypes.includes(vehicle_type)) {
+      throw new ApiError(400, `Invalid vehicle type. Allowed types are: ${allowedTypes.join(", ")}`, "VALIDATION_ERROR");
+    }
+  }
+
+  const capVal = max_load_capacity !== undefined ? max_load_capacity : capacity;
+  if (capVal !== undefined) {
+    const cap = Number(capVal);
+    if (isNaN(cap) || cap <= 0) {
+      throw new ApiError(400, "Maximum load capacity must be a positive number", "VALIDATION_ERROR");
+    }
+    req.body.max_load_capacity = cap;
+  }
+
+  if (odometer !== undefined) {
+    const odo = Number(odometer);
+    if (isNaN(odo) || odo < 0) {
+      throw new ApiError(400, "Odometer reading cannot be negative", "VALIDATION_ERROR");
+    }
+    req.body.odometer = odo;
+  }
+
+  if (acquisition_cost !== undefined) {
+    const cost = Number(acquisition_cost);
+    if (isNaN(cost) || cost < 0) {
+      throw new ApiError(400, "Acquisition cost must be a non-negative number", "VALIDATION_ERROR");
+    }
+    req.body.acquisition_cost = cost;
+  }
+
+  if (status !== undefined) {
+    const allowedStatuses = ["Available", "On Trip", "In Shop", "Retired"];
+    if (typeof status !== "string" || !allowedStatuses.includes(status)) {
+      throw new ApiError(400, `Invalid status. Allowed statuses are: ${allowedStatuses.join(", ")}`, "VALIDATION_ERROR");
+    }
+  }
+
+  next();
+};
+
