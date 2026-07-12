@@ -1,6 +1,8 @@
 import { db } from "../../config/dbConfig.js";
 import { vehicles } from "./vehicleModel.js";
-import { eq, and, or, ilike, desc, asc, isNull, count } from "drizzle-orm";
+import { trips } from "../trip/tripModel.js";
+import { maintenanceLogs } from "../maintenance/maintenanceModel.js";
+import { eq, and, or, ilike, desc, asc, isNull, count, gte, sql } from "drizzle-orm";
 import { ApiError } from "../../utils/ApiError.js";
 
 export const vehicleService = {
@@ -257,5 +259,148 @@ export const vehicleService = {
       maintenanceVehicles,
       retiredVehicles,
     };
+  },
+
+  diagnoseVehicle: async (id) => {
+    const result = await db
+      .select()
+      .from(vehicles)
+      .where(and(eq(vehicles.id, id), isNull(vehicles.deletedAt)))
+      .limit(1);
+
+    if (result.length === 0) {
+      throw new ApiError(404, "Vehicle not found", "VEHICLE_NOT_FOUND");
+    }
+
+    const vehicle = result[0];
+
+    // 1. Calculate vehicle_age_years from vehicleModel (looking for 4-digit year like "2020")
+    const yearMatch = vehicle.vehicleModel?.match(/\b(19|20)\d{2}\b/);
+    const modelYear = yearMatch ? parseInt(yearMatch[0], 10) : new Date(vehicle.createdAt).getFullYear();
+    const vehicle_age_years = Math.max(1, new Date().getFullYear() - modelYear);
+
+    // 2. Odometer KM
+    const odometer_km = Math.round(Number(vehicle.odometer) || 0);
+
+    // 3. Days since last service & previous repairs
+    const completedLogs = await db
+      .select()
+      .from(maintenanceLogs)
+      .where(
+        and(
+          eq(maintenanceLogs.vehicleId, id),
+          eq(maintenanceLogs.status, "Completed"),
+          isNull(maintenanceLogs.deletedAt)
+        )
+      )
+      .orderBy(desc(maintenanceLogs.completionDate));
+
+    let days_since_last_service = 0;
+    if (completedLogs.length > 0) {
+      const lastLog = completedLogs[0];
+      const lastServiceDate = lastLog.completionDate ? new Date(lastLog.completionDate) : new Date(lastLog.createdAt);
+      days_since_last_service = Math.max(0, Math.ceil((new Date() - lastServiceDate) / (1000 * 60 * 60 * 24)));
+    } else {
+      days_since_last_service = Math.max(0, Math.ceil((new Date() - new Date(vehicle.createdAt)) / (1000 * 60 * 60 * 24)));
+    }
+
+    const previous_repairs = completedLogs.length;
+
+    // 4. Sum maintenance cost for the last 365 days
+    const oneYearAgo = new Date();
+    oneYearAgo.setDate(oneYearAgo.getDate() - 365);
+
+    const pastYearMaintenance = await db
+      .select({ cost: maintenanceLogs.actualCost })
+      .from(maintenanceLogs)
+      .where(
+        and(
+          eq(maintenanceLogs.vehicleId, id),
+          eq(maintenanceLogs.status, "Completed"),
+          isNull(maintenanceLogs.deletedAt),
+          gte(maintenanceLogs.createdAt, oneYearAgo)
+        )
+      );
+    const maintenance_cost_last_year = pastYearMaintenance.reduce((sum, log) => sum + (Number(log.cost) || 0), 0);
+
+    // 5. Avg daily distance & estimated fuel efficiency from trips
+    const completedTrips = await db
+      .select({
+        distance: sql`COALESCE(${trips.actualDistance}, ${trips.plannedDistance}, 0)`,
+        fuel: trips.fuelConsumed
+      })
+      .from(trips)
+      .where(
+        and(
+          eq(trips.vehicleId, id),
+          eq(trips.status, "Completed"),
+          isNull(trips.deletedAt)
+        )
+      );
+
+    let avg_daily_distance_km = 120; // Default fallback
+    if (completedTrips.length > 0) {
+      const totalDist = completedTrips.reduce((sum, t) => sum + (Number(t.distance) || 0), 0);
+      avg_daily_distance_km = Math.round(totalDist / completedTrips.length) || 120;
+    }
+
+    let fuel_efficiency_kmpl = 8.5; // Default fallback
+    const validFuelTrips = completedTrips.filter(t => Number(t.fuel) > 0);
+    if (validFuelTrips.length > 0) {
+      const efficiencies = validFuelTrips.map(t => (Number(t.distance) || 0) / Number(t.fuel));
+      const avgEff = efficiencies.reduce((sum, eff) => sum + eff, 0) / efficiencies.length;
+      fuel_efficiency_kmpl = Number(avgEff.toFixed(2)) || 8.5;
+    }
+
+    // Map vehicleType standard values for Python ML model
+    let vehicle_type = "Truck";
+    if (vehicle.vehicleType) {
+      if (vehicle.vehicleType.toLowerCase().includes("pickup")) vehicle_type = "Pickup";
+      else if (vehicle.vehicleType.toLowerCase().includes("mini")) vehicle_type = "Mini Truck";
+    }
+
+    const payload = {
+      vehicle_type,
+      vehicle_age_years,
+      odometer_km,
+      days_since_last_service,
+      previous_repairs,
+      avg_daily_distance_km,
+      fuel_efficiency_kmpl,
+      maintenance_cost_last_year
+    };
+
+    try {
+      // Call local FastAPI endpoint
+      const response = await fetch("http://localhost:8000/predict", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return {
+        success: true,
+        features: payload,
+        prediction: data
+      };
+    } catch (err) {
+      console.error("AI service prediction call failed:", err.message);
+      // Fallback prediction mock in case FastAPI is offline
+      return {
+        success: false,
+        features: payload,
+        error: "AI microservice offline. Displaying heuristic estimate.",
+        prediction: {
+          maintenance_risk: odometer_km > 100000 || days_since_last_service > 180 ? "High" : "Low",
+          confidence: 85.0,
+          service_in_days: odometer_km > 100000 || days_since_last_service > 180 ? 10 : 50
+        }
+      };
+    }
   },
 };

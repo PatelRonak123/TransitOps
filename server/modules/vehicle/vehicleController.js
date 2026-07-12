@@ -123,3 +123,9 @@ export const getVehicleStatistics = asyncHandler(async (req, res) => {
     ...stats,
   });
 });
+
+export const diagnoseVehicle = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const result = await vehicleService.diagnoseVehicle(id);
+  return res.status(200).json(result);
+});
