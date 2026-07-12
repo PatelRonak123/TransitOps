@@ -6,37 +6,144 @@ import { hashPassword, comparePassword } from "../utils/password.js";
 import { generateToken } from "../utils/jwt.js";
 import { ENV } from "../config/env.js";
 
+const MAX_LOGIN_ATTEMPTS = 5;
+const ACCOUNT_LOCK_MINUTES = 15;
 
 export const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
+  const ipAddress = req.ip || req.headers["x-forwarded-for"] || null;
+  const userAgent = req.headers["user-agent"] || null;
 
   const user = await authService.findUserByEmail(email);
   if (!user) {
+    await authService.createAuthLog({
+      email,
+      ipAddress,
+      userAgent,
+      status: "FAILED"
+    });
     throw new ApiError(404, "User not found", "USER_NOT_FOUND");
   }
 
+  if (user.accountLockedUntil) {
+    const lockedUntilDate = new Date(user.accountLockedUntil);
+    const now = new Date();
+
+    if (lockedUntilDate > now) {
+      await authService.createAuthLog({
+        userId: user.id,
+        email,
+        ipAddress,
+        userAgent,
+        status: "LOCKED"
+      });
+
+      return res.status(423).json({
+        success: false,
+        message: "Account is locked. Please try again later.",
+        lockedUntil: lockedUntilDate.toISOString()
+      });
+    } else {
+      await authService.updateUserLockout(user.id, {
+        failedLoginAttempts: 0,
+        accountLockedUntil: null,
+        lastFailedLogin: null
+      });
+      user.failedLoginAttempts = 0;
+      user.accountLockedUntil = null;
+      user.lastFailedLogin = null;
+    }
+  }
+
   const isPasswordValid = await comparePassword(password, user.password);
+
   if (!isPasswordValid) {
-    throw new ApiError(401, "Invalid credentials", "INVALID_CREDENTIALS");
+    const attempts = user.failedLoginAttempts + 1;
+
+    if (attempts >= MAX_LOGIN_ATTEMPTS) {
+      const lockedUntil = new Date(Date.now() + ACCOUNT_LOCK_MINUTES * 60 * 1000);
+      
+      await authService.updateUserLockout(user.id, {
+        failedLoginAttempts: attempts,
+        accountLockedUntil: lockedUntil,
+        lastFailedLogin: new Date()
+      });
+
+      await authService.createAuthLog({
+        userId: user.id,
+        email,
+        ipAddress,
+        userAgent,
+        status: "LOCKED"
+      });
+
+      return res.status(423).json({
+        success: false,
+        message: "Account locked due to multiple failed login attempts.",
+        lockedFor: `${ACCOUNT_LOCK_MINUTES} minutes`,
+        lockedUntil: lockedUntil.toISOString()
+      });
+    } else {
+      await authService.updateUserLockout(user.id, {
+        failedLoginAttempts: attempts,
+        accountLockedUntil: null,
+        lastFailedLogin: new Date()
+      });
+
+      await authService.createAuthLog({
+        userId: user.id,
+        email,
+        ipAddress,
+        userAgent,
+        status: "FAILED"
+      });
+
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials",
+        remainingAttempts: MAX_LOGIN_ATTEMPTS - attempts
+      });
+    }
   }
 
   if (!user.isActive) {
+    await authService.createAuthLog({
+      userId: user.id,
+      email,
+      ipAddress,
+      userAgent,
+      status: "FAILED"
+    });
     throw new ApiError(403, "User account is suspended", "ACCOUNT_SUSPENDED");
   }
 
-  // Generate JWT token with ID and role
+  if (user.failedLoginAttempts > 0 || user.accountLockedUntil !== null) {
+    await authService.updateUserLockout(user.id, {
+      failedLoginAttempts: 0,
+      accountLockedUntil: null,
+      lastFailedLogin: null
+    });
+  }
+
+  await authService.createAuthLog({
+    userId: user.id,
+    email,
+    ipAddress,
+    userAgent,
+    status: "SUCCESS"
+  });
+
   const token = generateToken({ id: user.id, role: user.role });
 
   const cookieOptions = {
     httpOnly: true,
     sameSite: "strict",
     secure: ENV.NODE_ENV === "production",
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
+    maxAge: 7 * 24 * 60 * 60 * 1000,
   };
 
   res.cookie("token", token, cookieOptions);
 
-  // Return the user object formatted according to requirements
   const responseData = {
     success: true,
     user: {
