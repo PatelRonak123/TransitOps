@@ -1,8 +1,35 @@
 import { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { BriefcaseBusiness, Eye, EyeOff, ShieldCheck } from "lucide-react";
+import { useForm, useWatch } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import useLogin from "../hooks/useLogin";
+
+const roles = [
+    {
+        value: "Fleet Manager",
+        label: "Fleet Manager",
+        hint: "Full fleet control",
+        color: "border-orange-300 bg-orange-50 text-orange-700 ring-orange-100",
+    },
+    {
+        value: "Dispatcher",
+        label: "Dispatcher",
+        hint: "Trips and routing",
+        color: "border-blue-300 bg-blue-50 text-blue-700 ring-blue-100",
+    },
+    {
+        value: "Safety Officer",
+        label: "Safety Officer",
+        hint: "Compliance view",
+        color: "border-emerald-300 bg-emerald-50 text-emerald-700 ring-emerald-100",
+    },
+    {
+        value: "Financial Analyst",
+        label: "Financial Analyst",
+        hint: "Cost insights",
+        color: "border-violet-300 bg-violet-50 text-violet-700 ring-violet-100",
+    },
+];
 
 export default function LoginForm() {
 
@@ -10,6 +37,7 @@ export default function LoginForm() {
     const navigate = useNavigate();
     const {
         register,
+        control,
         handleSubmit,
         formState: { errors },
         setError,
@@ -17,10 +45,13 @@ export default function LoginForm() {
         defaultValues: {
             email: "",
             password: "",
+            role: "Fleet Manager",
+            rememberMe: false,
         },
     });
 
     const { login, isLoading, error } = useLogin();
+    const selectedRole = useWatch({ control, name: "role" });
 
     const onSubmit = async (formData) => {
         try {
@@ -75,6 +106,14 @@ export default function LoginForm() {
                     </p>
                 )}
 
+                
+
+                {errors.role && (
+                    <p className="-mt-3 text-sm text-red-600">
+                        {errors.role.message}
+                    </p>
+                )}
+
                 <div className="relative">
                     <input
                         {...register("password", {
@@ -105,11 +144,69 @@ export default function LoginForm() {
                     </p>
                 )}
 
+                <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                        <ShieldCheck size={17} className="text-orange-500" />
+                        Select Role
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        {roles.map((role) => {
+                            const isSelected = selectedRole === role.value;
+
+                            return (
+                                <label
+                                    key={role.value}
+                                    className={`group relative cursor-pointer rounded-2xl border p-4 transition duration-300 hover:-translate-y-0.5 hover:shadow-md ${
+                                        isSelected
+                                            ? `${role.color} scale-[1.02] shadow-md ring-4`
+                                            : "border-slate-200 bg-white text-slate-600 hover:border-orange-200 hover:bg-orange-50/40"
+                                    }`}
+                                >
+                                    <input
+                                        {...register("role", {
+                                            required: "Role is required",
+                                        })}
+                                        type="radio"
+                                        value={role.value}
+                                        className="sr-only"
+                                    />
+
+                                    <span
+                                        className={`absolute right-3 top-3 h-2.5 w-2.5 rounded-full transition ${
+                                            isSelected ? "scale-125 bg-current" : "bg-slate-300 group-hover:bg-orange-300"
+                                        }`}
+                                    />
+
+                                    <span className="flex items-start gap-3">
+                                        <span
+                                            className={`mt-0.5 rounded-xl p-2 transition ${
+                                                isSelected ? "bg-white/80" : "bg-slate-100 text-slate-500 group-hover:bg-white"
+                                            }`}
+                                        >
+                                            <BriefcaseBusiness size={18} />
+                                        </span>
+
+                                        <span>
+                                            <span className="block text-sm font-semibold">{role.label}</span>
+                                            <span className="mt-1 block text-xs opacity-75">{role.hint}</span>
+                                        </span>
+                                    </span>
+                                </label>
+                            );
+                        })}
+                    </div>
+                </div>
+
                 <div className="flex justify-between text-sm text-slate-600">
 
-                    <label>
+                    <label className="flex items-center gap-2">
 
-                        <input type="checkbox" />
+                        <input
+                            {...register("rememberMe")}
+                            type="checkbox"
+                            className="h-4 w-4 rounded border-slate-300 text-orange-500 focus:ring-orange-400"
+                        />
 
                         Remember Me
 
