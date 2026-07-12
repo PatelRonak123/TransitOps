@@ -696,6 +696,190 @@ export const validateUpdateFuelLog = (req, res, next) => {
   next();
 };
 
+export const validateCreateExpense = (req, res, next) => {
+  if (!req.body || typeof req.body !== "object") {
+    throw new ApiError(400, "Request body is required", "VALIDATION_ERROR");
+  }
+
+  const {
+    vehicle_id,
+    trip_id,
+    maintenance_id,
+    expense_type,
+    title,
+    amount,
+    expense_date,
+    payment_method,
+    payment_status,
+    vendor_name,
+    invoice_number,
+    receipt_url
+  } = req.body;
+
+  if (!vehicle_id && !trip_id && !maintenance_id) {
+    throw new ApiError(400, "Expense must be linked to a Vehicle, Trip or Maintenance.", "VALIDATION_ERROR");
+  }
+
+  if (!title || typeof title !== "string" || title.trim() === "") {
+    throw new ApiError(400, "Title is required", "VALIDATION_ERROR");
+  }
+  if (title.length > 255) {
+    throw new ApiError(400, "Title cannot exceed 255 characters", "VALIDATION_ERROR");
+  }
+  req.body.title = title.trim();
+
+  const allowedTypes = [
+    "Fuel",
+    "Maintenance",
+    "Repair",
+    "Insurance",
+    "Registration",
+    "Parking",
+    "Toll",
+    "Driver Allowance",
+    "Cleaning",
+    "Tyre Replacement",
+    "Battery",
+    "Miscellaneous"
+  ];
+  if (!expense_type || typeof expense_type !== "string" || !allowedTypes.includes(expense_type)) {
+    throw new ApiError(400, `Invalid expense type. Allowed types: ${allowedTypes.join(", ")}`, "VALIDATION_ERROR");
+  }
+
+  const amt = Number(amount);
+  if (amount === undefined || amount === null || isNaN(amt) || amt <= 0) {
+    throw new ApiError(400, "Amount must be a positive number greater than zero", "VALIDATION_ERROR");
+  }
+  req.body.amount = amt;
+
+  if (!expense_date || isNaN(Date.parse(expense_date))) {
+    throw new ApiError(400, "A valid expense date is required", "VALIDATION_ERROR");
+  }
+  const expDate = new Date(expense_date);
+  const today = new Date();
+  if (expDate > today) {
+    throw new ApiError(400, "Expense date cannot be in the future", "VALIDATION_ERROR");
+  }
+
+  const allowedMethods = ["Cash", "UPI", "Card", "Bank Transfer", "Cheque"];
+  if (!payment_method || typeof payment_method !== "string" || !allowedMethods.includes(payment_method)) {
+    throw new ApiError(400, `Invalid payment method. Allowed methods: ${allowedMethods.join(", ")}`, "VALIDATION_ERROR");
+  }
+
+  const allowedStatus = ["Paid", "Pending"];
+  if (!payment_status || typeof payment_status !== "string" || !allowedStatus.includes(payment_status)) {
+    throw new ApiError(400, `Invalid payment status. Allowed status: ${allowedStatus.join(", ")}`, "VALIDATION_ERROR");
+  }
+
+  if (vendor_name && vendor_name.length > 150) {
+    throw new ApiError(400, "Vendor name cannot exceed 150 characters", "VALIDATION_ERROR");
+  }
+
+  if (invoice_number && invoice_number.length > 100) {
+    throw new ApiError(400, "Invoice number cannot exceed 100 characters", "VALIDATION_ERROR");
+  }
+
+  if (receipt_url && receipt_url.length > 500) {
+    throw new ApiError(400, "Receipt URL cannot exceed 500 characters", "VALIDATION_ERROR");
+  }
+
+  next();
+};
+
+export const validateUpdateExpense = (req, res, next) => {
+  if (!req.body || typeof req.body !== "object") {
+    throw new ApiError(400, "Request body is required", "VALIDATION_ERROR");
+  }
+
+  const {
+    expense_type,
+    title,
+    amount,
+    expense_date,
+    payment_method,
+    payment_status,
+    vendor_name,
+    invoice_number,
+    receipt_url
+  } = req.body;
+
+  if (title !== undefined) {
+    if (typeof title !== "string" || title.trim() === "") {
+      throw new ApiError(400, "Title cannot be empty", "VALIDATION_ERROR");
+    }
+    if (title.length > 255) {
+      throw new ApiError(400, "Title cannot exceed 255 characters", "VALIDATION_ERROR");
+    }
+    req.body.title = title.trim();
+  }
+
+  if (expense_type !== undefined) {
+    const allowedTypes = [
+      "Fuel",
+      "Maintenance",
+      "Repair",
+      "Insurance",
+      "Registration",
+      "Parking",
+      "Toll",
+      "Driver Allowance",
+      "Cleaning",
+      "Tyre Replacement",
+      "Battery",
+      "Miscellaneous"
+    ];
+    if (typeof expense_type !== "string" || !allowedTypes.includes(expense_type)) {
+      throw new ApiError(400, `Invalid expense type. Allowed types: ${allowedTypes.join(", ")}`, "VALIDATION_ERROR");
+    }
+  }
+
+  if (amount !== undefined) {
+    const amt = Number(amount);
+    if (isNaN(amt) || amt <= 0) {
+      throw new ApiError(400, "Amount must be a positive number greater than zero", "VALIDATION_ERROR");
+    }
+    req.body.amount = amt;
+  }
+
+  if (expense_date !== undefined) {
+    if (isNaN(Date.parse(expense_date))) {
+      throw new ApiError(400, "Invalid expense date format", "VALIDATION_ERROR");
+    }
+    if (new Date(expense_date) > new Date()) {
+      throw new ApiError(400, "Expense date cannot be in the future", "VALIDATION_ERROR");
+    }
+  }
+
+  if (payment_method !== undefined) {
+    const allowedMethods = ["Cash", "UPI", "Card", "Bank Transfer", "Cheque"];
+    if (typeof payment_method !== "string" || !allowedMethods.includes(payment_method)) {
+      throw new ApiError(400, `Invalid payment method. Allowed methods: ${allowedMethods.join(", ")}`, "VALIDATION_ERROR");
+    }
+  }
+
+  if (payment_status !== undefined) {
+    const allowedStatus = ["Paid", "Pending"];
+    if (typeof payment_status !== "string" || !allowedStatus.includes(payment_status)) {
+      throw new ApiError(400, `Invalid payment status. Allowed status: ${allowedStatus.join(", ")}`, "VALIDATION_ERROR");
+    }
+  }
+
+  if (vendor_name && vendor_name.length > 150) {
+    throw new ApiError(400, "Vendor name cannot exceed 150 characters", "VALIDATION_ERROR");
+  }
+
+  if (invoice_number && invoice_number.length > 100) {
+    throw new ApiError(400, "Invoice number cannot exceed 100 characters", "VALIDATION_ERROR");
+  }
+
+  if (receipt_url && receipt_url.length > 500) {
+    throw new ApiError(400, "Receipt URL cannot exceed 500 characters", "VALIDATION_ERROR");
+  }
+
+  next();
+};
+
+
 
 
 
