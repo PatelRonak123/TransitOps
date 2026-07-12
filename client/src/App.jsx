@@ -1,17 +1,15 @@
-import { useState } from 'react'
-// import reactLogo from './assets/react.svg'
-// import viteLogo from './assets/vite.svg'
-// import heroImg from './assets/hero.png'
 import './index.css'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import Dashboard from './features/dashboard/pages/Dashboard'
 import Home from './features/auth/pages/Home'
+
 function App() {
     // Define routing here
     return (
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={<Home />} />
-                {/* <Route path="/about" element={<About />} /> */}
+                <Route path="/dashboard" element={<Dashboard />} />
             </Routes>
         </BrowserRouter>
     )
