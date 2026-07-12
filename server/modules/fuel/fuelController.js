@@ -1,5 +1,6 @@
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { fuelService } from "./fuelService.js";
+import { auditLogger } from "../../utils/auditLogger.js";
 
 const formatFuelResponse = (item) => {
   if (!item) return null;
@@ -58,10 +59,21 @@ const formatFuelResponse = (item) => {
 export const createFuelLog = asyncHandler(async (req, res) => {
   try {
     const log = await fuelService.createFuelLog(req.body, req.user.id);
+    const formatted = formatFuelResponse(log);
+    await auditLogger({
+      action: "CREATE",
+      module: "Fuel",
+      entityId: formatted.id,
+      entityName: "Fuel Log",
+      newData: formatted,
+      description: `Fuel log recorded: ${formatted.fuel_log_number} (${formatted.liters}L of ${formatted.fuel_type})`,
+      request: req,
+      status: "SUCCESS"
+    });
     return res.status(201).json({
       success: true,
       message: "Fuel Log created successfully",
-      data: formatFuelResponse(log),
+      data: formatted,
     });
   } catch (error) {
     if (error.statusCode === 409) {
@@ -95,16 +107,35 @@ export const getFuelLogById = asyncHandler(async (req, res) => {
 export const updateFuelLog = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const log = await fuelService.updateFuelLog(id, req.body);
+  const formatted = formatFuelResponse(log);
+  await auditLogger({
+    action: "UPDATE",
+    module: "Fuel",
+    entityId: formatted.id,
+    entityName: "Fuel Log",
+    newData: formatted,
+    description: `Fuel log updated: ${formatted.fuel_log_number}`,
+    request: req,
+    status: "SUCCESS"
+  });
   return res.status(200).json({
     success: true,
     message: "Fuel Log updated successfully",
-    data: formatFuelResponse(log),
+    data: formatted,
   });
 });
-
 export const deleteFuelLog = asyncHandler(async (req, res) => {
   const { id } = req.params;
   await fuelService.deleteFuelLog(id);
+  await auditLogger({
+    action: "DELETE",
+    module: "Fuel",
+    entityId: id,
+    entityName: "Fuel Log",
+    description: `Fuel record deleted: ID ${id}`,
+    request: req,
+    status: "SUCCESS"
+  });
   return res.status(200).json({
     success: true,
     message: "Fuel Log deleted successfully",

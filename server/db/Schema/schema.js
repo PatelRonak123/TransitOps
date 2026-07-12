@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, boolean, timestamp, integer, text } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, boolean, timestamp, integer, text, jsonb } from "drizzle-orm/pg-core";
 import { roleEnum } from "./enum.js";
 
 export const users = pgTable("users", {
@@ -23,4 +23,37 @@ export const authLogs = pgTable("auth_logs", {
   userAgent: text("user_agent"),
   status: varchar("status", { length: 20 }).notNull(), // SUCCESS, FAILED, LOCKED
   createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const loginHistory = pgTable("login_history", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").references(() => users.id),
+  email: varchar("email").notNull(),
+  role: varchar("role"),
+  ipAddress: varchar("ip_address", { length: 50 }),
+  browser: varchar("browser", { length: 100 }),
+  operatingSystem: varchar("operating_system", { length: 100 }),
+  deviceType: varchar("device_type", { length: 50 }),
+  status: varchar("status", { length: 20 }).notNull(), // SUCCESS, FAILED, LOCKED, ROLE_MISMATCH
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const auditLogs = pgTable("audit_logs", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").references(() => users.id),
+  action: varchar("action", { length: 100 }).notNull(),
+  module: varchar("module", { length: 100 }).notNull(),
+  entityId: uuid("entity_id"),
+  entityName: varchar("entity_name", { length: 100 }),
+  oldData: jsonb("old_data"),
+  newData: jsonb("new_data"),
+  description: text("description").notNull(),
+  ipAddress: varchar("ip_address", { length: 100 }),
+  browser: varchar("browser", { length: 100 }),
+  operatingSystem: varchar("operating_system", { length: 100 }),
+  deviceType: varchar("device_type", { length: 100 }),
+  requestMethod: varchar("request_method", { length: 10 }).notNull(),
+  requestUrl: varchar("request_url", { length: 255 }).notNull(),
+  status: varchar("status", { length: 50 }).notNull(), // SUCCESS, FAILED
+  createdAt: timestamp("created_at").defaultNow().notNull()
 });

@@ -1,6 +1,7 @@
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { driverService } from "./driverService.js";
 import { ApiError } from "../../utils/ApiError.js";
+import { auditLogger } from "../../utils/auditLogger.js";
 
 const formatDriverResponse = (driver) => {
   if (!driver) return null;
@@ -27,6 +28,16 @@ const formatDriverResponse = (driver) => {
 export const createDriver = asyncHandler(async (req, res) => {
   try {
     const driver = await driverService.createDriver(req.body);
+    await auditLogger({
+      action: "CREATE",
+      module: "Driver",
+      entityId: driver.id,
+      entityName: "Driver",
+      newData: formatDriverResponse(driver),
+      description: `Driver profile created: ${driver.fullName} (${driver.licenseNumber})`,
+      request: req,
+      status: "SUCCESS"
+    });
     return res.status(201).json({
       success: true,
       message: "Driver created successfully",
@@ -64,6 +75,16 @@ export const getDriverById = asyncHandler(async (req, res) => {
 export const updateDriver = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const driver = await driverService.updateDriver(id, req.body);
+  await auditLogger({
+    action: "UPDATE",
+    module: "Driver",
+    entityId: driver.id,
+    entityName: "Driver",
+    newData: formatDriverResponse(driver),
+    description: `Driver profile updated: ${driver.fullName}`,
+    request: req,
+    status: "SUCCESS"
+  });
   return res.status(200).json({
     success: true,
     message: "Driver updated successfully",
@@ -74,6 +95,15 @@ export const updateDriver = asyncHandler(async (req, res) => {
 export const deleteDriver = asyncHandler(async (req, res) => {
   const { id } = req.params;
   await driverService.deleteDriver(id);
+  await auditLogger({
+    action: "DELETE",
+    module: "Driver",
+    entityId: id,
+    entityName: "Driver",
+    description: `Driver profile deleted: ID ${id}`,
+    request: req,
+    status: "SUCCESS"
+  });
   return res.status(200).json({
     success: true,
     message: "Driver deleted successfully",

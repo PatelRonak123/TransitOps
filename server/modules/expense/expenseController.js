@@ -1,5 +1,6 @@
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { expenseService } from "./expenseService.js";
+import { auditLogger } from "../../utils/auditLogger.js";
 
 const formatExpenseResponse = (item) => {
   if (!item) return null;
@@ -67,10 +68,21 @@ const formatExpenseResponse = (item) => {
 
 export const createExpense = asyncHandler(async (req, res) => {
   const log = await expenseService.createExpense(req.body, req.user.id);
+  const formatted = formatExpenseResponse(log);
+  await auditLogger({
+    action: "CREATE",
+    module: "Expense",
+    entityId: formatted.id,
+    entityName: "Expense",
+    newData: formatted,
+    description: `Expense created: ${formatted.expense_number} - ${formatted.title} ($${formatted.amount})`,
+    request: req,
+    status: "SUCCESS"
+  });
   return res.status(201).json({
     success: true,
     message: "Expense created successfully",
-    data: formatExpenseResponse(log),
+    data: formatted,
   });
 });
 
@@ -95,16 +107,35 @@ export const getExpenseById = asyncHandler(async (req, res) => {
 export const updateExpense = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const log = await expenseService.updateExpense(id, req.body);
+  const formatted = formatExpenseResponse(log);
+  await auditLogger({
+    action: "UPDATE",
+    module: "Expense",
+    entityId: formatted.id,
+    entityName: "Expense",
+    newData: formatted,
+    description: `Expense updated: ${formatted.expense_number}`,
+    request: req,
+    status: "SUCCESS"
+  });
   return res.status(200).json({
     success: true,
     message: "Expense updated successfully",
-    data: formatExpenseResponse(log),
+    data: formatted,
   });
 });
-
 export const deleteExpense = asyncHandler(async (req, res) => {
   const { id } = req.params;
   await expenseService.deleteExpense(id);
+  await auditLogger({
+    action: "DELETE",
+    module: "Expense",
+    entityId: id,
+    entityName: "Expense",
+    description: `Expense record deleted: ID ${id}`,
+    request: req,
+    status: "SUCCESS"
+  });
   return res.status(200).json({
     success: true,
     message: "Expense deleted successfully",
