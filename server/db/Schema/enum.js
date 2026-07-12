@@ -69,5 +69,14 @@ export const maintenanceStatusEnum = pgEnum("maintenance_status", [
   "Cancelled"
 ]);
 
+export const fuelTypeEnum = pgEnum("fuel_type", [
+  "Diesel",
+  "Petrol",
+  "CNG",
+  "Electric",
+  "Other"
+]);
+
+
 
 

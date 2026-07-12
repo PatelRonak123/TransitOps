@@ -604,5 +604,98 @@ export const validateCompleteMaintenanceBody = (req, res, next) => {
   next();
 };
 
+export const validateCreateFuelLog = (req, res, next) => {
+  if (!req.body || typeof req.body !== "object") {
+    throw new ApiError(400, "Request body is required", "VALIDATION_ERROR");
+  }
+
+  const { trip_id, vehicle_id, fuel_type, liters, price_per_liter, odometer_reading, fuel_date } = req.body;
+
+  if (!trip_id || typeof trip_id !== "string") {
+    throw new ApiError(400, "Trip ID is required", "VALIDATION_ERROR");
+  }
+
+  if (!vehicle_id || typeof vehicle_id !== "string") {
+    throw new ApiError(400, "Vehicle ID is required", "VALIDATION_ERROR");
+  }
+
+  const allowedTypes = ["Diesel", "Petrol", "CNG", "Electric", "Other"];
+  if (!fuel_type || typeof fuel_type !== "string" || !allowedTypes.includes(fuel_type)) {
+    throw new ApiError(400, `Invalid fuel type. Allowed types: ${allowedTypes.join(", ")}`, "VALIDATION_ERROR");
+  }
+
+  const l = Number(liters);
+  if (liters === undefined || liters === null || isNaN(l) || l <= 0) {
+    throw new ApiError(400, "Liters must be a positive number", "VALIDATION_ERROR");
+  }
+  req.body.liters = l;
+
+  const p = Number(price_per_liter);
+  if (price_per_liter === undefined || price_per_liter === null || isNaN(p) || p <= 0) {
+    throw new ApiError(400, "Price per liter must be a positive number", "VALIDATION_ERROR");
+  }
+  req.body.price_per_liter = p;
+
+  const odo = Number(odometer_reading);
+  if (odometer_reading === undefined || odometer_reading === null || isNaN(odo) || odo <= 0) {
+    throw new ApiError(400, "Odometer reading must be a positive number", "VALIDATION_ERROR");
+  }
+  req.body.odometer_reading = odo;
+
+  if (!fuel_date || isNaN(Date.parse(fuel_date))) {
+    throw new ApiError(400, "A valid fuel date is required", "VALIDATION_ERROR");
+  }
+
+  next();
+};
+
+export const validateUpdateFuelLog = (req, res, next) => {
+  if (!req.body || typeof req.body !== "object") {
+    throw new ApiError(400, "Request body is required", "VALIDATION_ERROR");
+  }
+
+  const { fuel_type, liters, price_per_liter, odometer_reading, fuel_date } = req.body;
+
+  if (fuel_type !== undefined) {
+    const allowedTypes = ["Diesel", "Petrol", "CNG", "Electric", "Other"];
+    if (typeof fuel_type !== "string" || !allowedTypes.includes(fuel_type)) {
+      throw new ApiError(400, `Invalid fuel type. Allowed types: ${allowedTypes.join(", ")}`, "VALIDATION_ERROR");
+    }
+  }
+
+  if (liters !== undefined) {
+    const l = Number(liters);
+    if (isNaN(l) || l <= 0) {
+      throw new ApiError(400, "Liters must be a positive number", "VALIDATION_ERROR");
+    }
+    req.body.liters = l;
+  }
+
+  if (price_per_liter !== undefined) {
+    const p = Number(price_per_liter);
+    if (isNaN(p) || p <= 0) {
+      throw new ApiError(400, "Price per liter must be a positive number", "VALIDATION_ERROR");
+    }
+    req.body.price_per_liter = p;
+  }
+
+  if (odometer_reading !== undefined) {
+    const odo = Number(odometer_reading);
+    if (isNaN(odo) || odo <= 0) {
+      throw new ApiError(400, "Odometer reading must be a positive number", "VALIDATION_ERROR");
+    }
+    req.body.odometer_reading = odo;
+  }
+
+  if (fuel_date !== undefined) {
+    if (isNaN(Date.parse(fuel_date))) {
+      throw new ApiError(400, "Invalid fuel date", "VALIDATION_ERROR");
+    }
+  }
+
+  next();
+};
+
+
 
 
