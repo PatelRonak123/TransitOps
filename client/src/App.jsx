@@ -2,6 +2,7 @@ import { useState } from 'react'
 import './index.css'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Dashboard from './features/dashboard/pages/Dashboard'
+import Home from './features/auth/pages/Home'
 
 function App() {
     // Define routing here
