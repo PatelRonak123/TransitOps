@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import Dashboard from './features/dashboard/pages/Dashboard'
 import Home from './features/auth/pages/Home'
 import { AuthProvider, useAuth } from './features/auth/context/AuthContext'
+import Drivers from "./features/drivers/pages/Drivers";
 
 function AppRoutes() {
     const { isAuthenticated, isLoading } = useAuth()
@@ -20,6 +21,10 @@ function AppRoutes() {
             <Route
                 path="/dashboard"
                 element={isAuthenticated ? <Dashboard /> : <Navigate to="/" replace />}
+            />
+            <Route 
+                path="/drivers" 
+                element={isAuthenticated ? <Drivers /> : <Navigate to="/" replace />} 
             />
         </Routes>
     )
