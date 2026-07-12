@@ -77,6 +77,35 @@ export const fuelTypeEnum = pgEnum("fuel_type", [
   "Other"
 ]);
 
+export const expenseTypeEnum = pgEnum("expense_type", [
+  "Fuel",
+  "Maintenance",
+  "Repair",
+  "Insurance",
+  "Registration",
+  "Parking",
+  "Toll",
+  "Driver Allowance",
+  "Cleaning",
+  "Tyre Replacement",
+  "Battery",
+  "Miscellaneous"
+]);
+
+export const paymentMethodEnum = pgEnum("payment_method", [
+  "Cash",
+  "UPI",
+  "Card",
+  "Bank Transfer",
+  "Cheque"
+]);
+
+export const paymentStatusEnum = pgEnum("payment_status", [
+  "Paid",
+  "Pending"
+]);
+
+
 
 
 
