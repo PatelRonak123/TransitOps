@@ -1,4 +1,5 @@
-import './App.css'
+import { useState } from 'react'
+import './index.css'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Dashboard from './features/dashboard/pages/Dashboard'
 
@@ -7,7 +8,7 @@ function App() {
     return (
         <BrowserRouter>
             <Routes>
-                <Route path="/" element={<Dashboard />} />
+                <Route path="/" element={<Home />} />
                 <Route path="/dashboard" element={<Dashboard />} />
             </Routes>
         </BrowserRouter>
