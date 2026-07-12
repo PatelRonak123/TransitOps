@@ -8,6 +8,7 @@ import { AuthProvider, useAuth } from './features/auth/context/AuthContext'
 import Drivers from "./features/drivers/pages/Drivers";
 import Reports from "./features/reports/pages/Reports";
 import Settings from "./features/settings/pages/Settings";
+import FuelExpenses from "./features/fuel-expenses/pages/FuelExpenses";
 
 function AppRoutes() {
     const { isAuthenticated, isLoading } = useAuth()
@@ -49,6 +50,10 @@ function AppRoutes() {
             <Route
                 path="/vehicles"
                 element={isAuthenticated ? <Vehicles /> : <Navigate to="/" replace />}
+            />
+            <Route 
+                path="/fuel-expenses" 
+                element={isAuthenticated ? <FuelExpenses /> : <Navigate to="/" replace />} 
             />
         </Routes>
     )
