@@ -31,7 +31,7 @@ const FuelExpenseTable = ({ records = [], loading = false, onDelete }) => {
                 <div className="text-sm text-gray-500">{record.description || record.fuel_station || record.vendor_name || "—"}</div>
               </td>
               <td>{record.expense_type || record.fuel_type || "—"}</td>
-              <td className="font-semibold text-slate-800">${Number(record.amount || record.total_cost || 0).toFixed(2)}</td>
+              <td className="font-semibold text-slate-800">₹{Number(record.amount || record.total_cost || 0).toFixed(2)}</td>
               <td>{record.expense_date || record.fuel_date || "—"}</td>
               <td>{record.vehicle?.registration_number || record.trip?.trip_number || "—"}</td>
               <td>{record.payment_status || record.status || "—"}</td>

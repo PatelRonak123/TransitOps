@@ -90,17 +90,9 @@ function AppRoutes() {
                 path="/maintenance"
                 element={<ProtectedRoute path="/maintenance" element={<Maintenance />} />}
             />
-            <Route
-                path="/fuel-expenses"
-                element={<ProtectedRoute path="/fuel-expenses" element={<FuelExpenses />} />}
-            />
-            <Route
-                path="/ai-diagnostics"
-                element={<ProtectedRoute path="/ai-diagnostics" element={<AiDiagnostics />} />}
-            />
-            <Route
-                path="*"
-                element={<Navigate to={isAuthenticated ? getDefaultPath(user?.role) : "/"} replace />}
+            <Route 
+                path="/fuel-expenses" 
+                element={isAuthenticated ? <FuelExpenses /> : <Navigate to="/" replace />} 
             />
         </Routes>
     )

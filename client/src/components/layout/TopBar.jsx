@@ -5,6 +5,64 @@ import { Truck, Users, Route, Loader2, Search, X } from "lucide-react";
 import { useAuth } from "../../features/auth/context/AuthContext";
 import dashboardService from "../../features/dashboard/service/dashboardService";
 
+const buildNotificationItems = (alerts) => {
+  const items = [];
+
+  if (alerts?.overdueMaintenance?.length > 0) {
+    alerts.overdueMaintenance.forEach((maintenance) => {
+      items.push({
+        id: `mnt-${maintenance.id}`,
+        type: "danger",
+        title: `Maintenance overdue for #${maintenance.maintenance_number}`,
+        message: maintenance.issue_title,
+        meta: maintenance.expected_completion_date
+          ? `Expected completion: ${new Date(maintenance.expected_completion_date).toLocaleDateString()}`
+          : "No expected completion date set",
+        category: "maintenance",
+        searchVal: maintenance.maintenance_number,
+      });
+    });
+  }
+
+  if (alerts?.driverLicenseExpiring?.length > 0) {
+    alerts.driverLicenseExpiring.forEach((driver) => {
+      items.push({
+        id: `drv-${driver.id}`,
+        type: "warning",
+        title: `License expiring soon for ${driver.full_name}`,
+        message: driver.license_number,
+        meta: driver.license_expiry_date
+          ? `Expiry: ${new Date(driver.license_expiry_date).toLocaleDateString()}`
+          : "No expiry date set",
+        category: "drivers",
+        searchVal: driver.full_name,
+      });
+    });
+  }
+
+  if (alerts?.vehiclesDueForMaintenance?.length > 0) {
+    alerts.vehiclesDueForMaintenance.forEach((vehicle) => {
+      items.push({
+        id: `veh-${vehicle.id}`,
+        type: "info",
+        title: `Vehicle due for maintenance: ${vehicle.registration_number}`,
+        message: vehicle.vehicle_name,
+        meta: vehicle.status ? `Status: ${vehicle.status}` : "Maintenance recommended",
+        category: "vehicles",
+        searchVal: vehicle.registration_number,
+      });
+    });
+  }
+
+  return items;
+};
+
+const notificationStyles = {
+  danger: "border-rose-200 bg-rose-50 text-rose-700",
+  warning: "border-amber-200 bg-amber-50 text-amber-700",
+  info: "border-sky-200 bg-sky-50 text-sky-700",
+};
+
 const Topbar = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -15,6 +73,10 @@ const Topbar = () => {
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const searchRef = useRef(null);
+  const [alerts, setAlerts] = useState([]);
+  const [alertsLoading, setAlertsLoading] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const notificationsRef = useRef(null);
 
   // Close search dropdown on click outside
   useEffect(() => {
@@ -25,6 +87,43 @@ const Topbar = () => {
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
+        setShowNotifications(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadAlerts = async () => {
+      try {
+        setAlertsLoading(true);
+        const response = await dashboardService.getAlerts();
+        if (!active) return;
+
+        if (response?.success) {
+          setAlerts(buildNotificationItems(response.data));
+        }
+      } catch (err) {
+        console.error("Notifications fetch error:", err);
+      } finally {
+        if (active) setAlertsLoading(false);
+      }
+    };
+
+    loadAlerts();
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   // Fetch search results on query change
@@ -70,10 +169,18 @@ const Topbar = () => {
     }
   };
 
+  const handleNotificationClick = (alert) => {
+    setShowNotifications(false);
+    if (alert.category && alert.searchVal) {
+      navigate(`/${alert.category}?search=${encodeURIComponent(alert.searchVal)}`);
+    }
+  };
+
   const hasResults = 
     results.vehicles.length > 0 || 
     results.drivers.length > 0 || 
     results.trips.length > 0;
+  const unreadCount = alerts.length;
 
   return (
     <header className="h-20 bg-white border-b border-gray-200 px-8 flex items-center justify-between z-40 relative">
@@ -213,10 +320,68 @@ const Topbar = () => {
       {/* Right User Bar */}
       <div className="flex items-center gap-6">
 
-        <button className="relative p-2 hover:bg-slate-50 rounded-xl transition text-slate-500">
-          <FaBell className="text-xl" />
-          <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500"></span>
-        </button>
+        <div ref={notificationsRef} className="relative">
+          <button
+            type="button"
+            onClick={() => setShowNotifications((current) => !current)}
+            className="relative p-2 hover:bg-slate-50 rounded-xl transition text-slate-500"
+            aria-label="Show notifications"
+            aria-expanded={showNotifications}
+          >
+            <FaBell className="text-xl" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white shadow">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            )}
+          </button>
+
+          {showNotifications && (
+            <div className="absolute right-0 top-full mt-3 w-[360px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl z-50">
+              <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">Notifications</p>
+                  <p className="text-xs text-slate-500">{alertsLoading ? "Loading alerts..." : `${unreadCount} active alerts`}</p>
+                </div>
+                <span className="rounded-full bg-orange-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-orange-600">
+                  Live
+                </span>
+              </div>
+
+              <div className="max-h-[420px] overflow-y-auto p-2">
+                {alertsLoading ? (
+                  <div className="flex items-center justify-center py-10 text-sm text-slate-500">
+                    Loading notifications...
+                  </div>
+                ) : alerts.length === 0 ? (
+                  <div className="px-4 py-10 text-center text-sm text-slate-500">
+                    No active alerts right now.
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {alerts.map((alert) => (
+                      <button
+                        key={alert.id}
+                        type="button"
+                        onClick={() => handleNotificationClick(alert)}
+                        className={`w-full rounded-2xl border p-3 text-left transition hover:shadow-sm ${notificationStyles[alert.type] || notificationStyles.info}`}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-semibold leading-5 text-slate-900">{alert.title}</p>
+                            <p className="mt-1 text-xs text-slate-600">{alert.message}</p>
+                            <p className="mt-2 text-[11px] font-medium uppercase tracking-wider text-slate-500">{alert.meta}</p>
+                          </div>
+                          <span className="mt-0.5 h-2.5 w-2.5 rounded-full bg-current opacity-60" />
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
 
         <div className="flex items-center gap-3">
           {/* Initials-based Profile Avatar Circle */}

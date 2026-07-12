@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import MainLayout from "../../../components/layout/MainLayout";
 import AddTripModal from "../components/AddTripModal";
 import CompleteTripModal from "../components/CompleteTripModal";
@@ -14,11 +15,18 @@ const StatCard = ({ label, value }) => (
 );
 
 export const Trips = () => {
+  const [searchParams] = useSearchParams();
+  const searchParam = searchParams.get("search") || "";
+
   const [openModal, setOpenModal] = useState(false);
   const [completeOpen, setCompleteOpen] = useState(false);
   const [selectedTrip, setSelectedTrip] = useState(null);
-  const [filters, setFilters] = useState({ search: "", status: "", start_date: "", end_date: "" });
+  const [filters, setFilters] = useState({ search: searchParam, status: "", start_date: "", end_date: "" });
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    setFilters((prev) => ({ ...prev, search: searchParam }));
+  }, [searchParam]);
   const {
     trips,
     pagination,

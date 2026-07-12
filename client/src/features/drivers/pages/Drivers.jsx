@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import MainLayout from "../../../components/layout/MainLayout";
 import DriverFilters from "../components/DriverFilters";
 import { DriverTable } from "../components/DriverTable";
@@ -7,11 +8,18 @@ import DeleteDriverModal from "../components/DeleteDriverModal";
 import useDrivers from "../hooks/useDrivers";
 
 export const Drivers = () => {
+  const [searchParams] = useSearchParams();
+  const searchParam = searchParams.get("search") || "";
+
   const [openModal, setOpenModal] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState(null);
-  const [filters, setFilters] = useState({ search: "", status: "", license_category: "" });
+  const [filters, setFilters] = useState({ search: searchParam, status: "", license_category: "" });
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    setFilters((prev) => ({ ...prev, search: searchParam }));
+  }, [searchParam]);
   const { drivers, pagination, stats, loading, error, fetchDrivers, createDriver, removeDriver } = useDrivers();
 
   const handleDeleteClick = (driver) => {
