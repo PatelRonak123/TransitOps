@@ -44,4 +44,30 @@ export const tripStatusEnum = pgEnum("trip_status", [
   "Cancelled"
 ]);
 
+export const maintenanceTypeEnum = pgEnum("maintenance_type", [
+  "Oil Change",
+  "Engine Repair",
+  "Tyre Replacement",
+  "Battery",
+  "General Service",
+  "Brake Service",
+  "Accident Repair",
+  "Other"
+]);
+
+export const maintenancePriorityEnum = pgEnum("maintenance_priority", [
+  "Low",
+  "Medium",
+  "High",
+  "Critical"
+]);
+
+export const maintenanceStatusEnum = pgEnum("maintenance_status", [
+  "Open",
+  "In Progress",
+  "Completed",
+  "Cancelled"
+]);
+
+
 
