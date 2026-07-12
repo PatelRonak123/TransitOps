@@ -5,6 +5,10 @@ import { ApiError } from "../../utils/ApiError.js";
 
 export const vehicleService = {
   createVehicle: async (vehicleData) => {
+    if (!vehicleData || typeof vehicleData !== "object") {
+      throw new ApiError(400, "Request body is required", "VALIDATION_ERROR");
+    }
+
     const regNum = vehicleData.registration_number.trim().toUpperCase();
     const existing = await db
       .select()
@@ -124,6 +128,10 @@ export const vehicleService = {
   },
 
   updateVehicle: async (id, updateData) => {
+    if (!updateData || typeof updateData !== "object") {
+      throw new ApiError(400, "Request body is required", "VALIDATION_ERROR");
+    }
+
     const result = await db
       .select()
       .from(vehicles)

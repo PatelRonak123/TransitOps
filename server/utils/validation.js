@@ -61,6 +61,10 @@ export const validateRegister = (req, res, next) => {
 };
 
 export const validateCreateVehicle = (req, res, next) => {
+  if (!req.body || typeof req.body !== "object") {
+    throw new ApiError(400, "Request body is required", "VALIDATION_ERROR");
+  }
+
   const {
     registration_number,
     vehicle_name,
@@ -121,6 +125,10 @@ export const validateCreateVehicle = (req, res, next) => {
 };
 
 export const validateUpdateVehicle = (req, res, next) => {
+  if (!req.body || typeof req.body !== "object") {
+    throw new ApiError(400, "Request body is required", "VALIDATION_ERROR");
+  }
+
   const {
     vehicle_name,
     vehicle_type,
@@ -179,4 +187,3 @@ export const validateUpdateVehicle = (req, res, next) => {
 
   next();
 };
-
