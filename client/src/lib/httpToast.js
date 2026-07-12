@@ -40,7 +40,15 @@ const paletteByStatus = (statusCode) => {
   };
 };
 
+let lastToast = { message: "", timestamp: 0 };
+
 export const showHttpToast = (statusCode, message) => {
+  const now = Date.now();
+  if (lastToast.message === message && now - lastToast.timestamp < 500) {
+    return;
+  }
+  lastToast = { message, timestamp: now };
+
   const colors = paletteByStatus(statusCode);
 
   const notify = statusCode >= 200 && statusCode < 300 ? toast.success : toast.error;

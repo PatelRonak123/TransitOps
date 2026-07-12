@@ -1,4 +1,5 @@
 import axios from "axios"
+import { showHttpToast } from "../lib/httpToast"
 
 const apiClient = axios.create({
     baseURL: "http://localhost:3000",
@@ -24,6 +25,10 @@ apiClient.interceptors.response.use(
         return response
     },
     (error) => {
+        if (error.response && error.response.status === 403) {
+            const message = error.response.data?.message || "Access forbidden. Insufficient permissions.";
+            showHttpToast(403, message);
+        }
         return Promise.reject(error)
     }
 )

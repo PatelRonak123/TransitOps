@@ -43,6 +43,18 @@ export const authService = {
     return result[0];
   },
 
+  updateUserPassword: async (userId, hashedPassword) => {
+    const result = await db
+      .update(users)
+      .set({
+        password: hashedPassword,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return result[0];
+  },
+
   createAuthLog: async (logData) => {
     const result = await db
       .insert(authLogs)

@@ -37,13 +37,28 @@ const MaintenanceTable = ({ records = [], loading = false, onStart, onComplete, 
               <td>₹{Number(record.estimated_cost || 0).toFixed(2)}</td>
               <td>
                 <div className="flex justify-center gap-2">
-                  <button onClick={() => onStart(record.id)} className="rounded-lg p-2 text-blue-500 transition hover:bg-blue-50" title="Start maintenance">
+                  <button
+                    onClick={() => onStart(record.id)}
+                    disabled={record.status !== "Open"}
+                    className="rounded-lg p-2 text-blue-500 transition hover:bg-blue-50 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                    title="Start maintenance"
+                  >
                     <FaPlay />
                   </button>
-                  <button onClick={() => onComplete(record.id)} className="rounded-lg p-2 text-green-600 transition hover:bg-green-50" title="Complete maintenance">
+                  <button
+                    onClick={() => onComplete(record.id)}
+                    disabled={record.status !== "In Progress"}
+                    className="rounded-lg p-2 text-green-600 transition hover:bg-green-50 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                    title="Complete maintenance"
+                  >
                     <FaCheckCircle />
                   </button>
-                  <button onClick={() => onCancel(record.id)} className="rounded-lg p-2 text-red-500 transition hover:bg-red-50" title="Cancel maintenance">
+                  <button
+                    onClick={() => onCancel(record.id)}
+                    disabled={record.status !== "Open" && record.status !== "In Progress"}
+                    className="rounded-lg p-2 text-red-500 transition hover:bg-red-50 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                    title="Cancel maintenance"
+                  >
                     <FaTimesCircle />
                   </button>
                 </div>
