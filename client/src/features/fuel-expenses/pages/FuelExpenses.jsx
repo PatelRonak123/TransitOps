@@ -4,6 +4,7 @@ import FuelExpenseFilters from "../components/FuelExpenseFilters";
 import FuelExpenseTable from "../components/FuelExpenseTable";
 import FuelExpenseModal from "../components/FuelExpenseModal";
 import useFuelExpenses from "../hooks/useFuelExpenses";
+import useTrips from "../../trips/hooks/useTrips";
 
 const FuelExpenses = () => {
   const [activeTab, setActiveTab] = useState("fuel");
@@ -11,11 +12,17 @@ const FuelExpenses = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const { fuelLogs, expenses, fuelStats, expenseStats, loading, error, fetchData, createFuel, createExpenseEntry, deleteFuel, deleteExpense } = useFuelExpenses();
+  const { trips, vehicles, fetchTrips, fetchReferenceData } = useTrips();
 
   useEffect(() => {
     const normalizedFilters = Object.fromEntries(Object.entries(filters).filter(([, value]) => value !== ""));
     fetchData({ page: 1, limit: 10, ...normalizedFilters });
   }, [fetchData, filters]);
+
+  useEffect(() => {
+    fetchTrips({ page: 1, limit: 100 });
+    fetchReferenceData();
+  }, [fetchTrips, fetchReferenceData]);
 
   const records = useMemo(() => (activeTab === "fuel" ? fuelLogs : expenses), [activeTab, fuelLogs, expenses]);
   const stats = activeTab === "fuel" ? fuelStats : expenseStats;
@@ -85,7 +92,15 @@ const FuelExpenses = () => {
         <FuelExpenseTable records={records} loading={loading} onDelete={handleDelete} />
       </div>
 
-      <FuelExpenseModal open={modalOpen} onClose={() => setModalOpen(false)} onSubmit={handleCreate} submitting={submitting} mode={activeTab === "fuel" ? "fuel" : "expense"} />
+      <FuelExpenseModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSubmit={handleCreate}
+        submitting={submitting}
+        mode={activeTab === "fuel" ? "fuel" : "expense"}
+        trips={trips}
+        vehicles={vehicles}
+      />
     </MainLayout>
   );
 };
